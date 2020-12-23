@@ -10,16 +10,16 @@ bool isLoop = true;
 
 
 void handleEventPolling() {
-  SDL_Event *windowEvent;
+  SDL_Event windowEvent;
   
-  if (SDL_PollEvent(windowEvent)) {
+  while (SDL_PollEvent(&windowEvent) != 0) {
     // Check if close button was clicked
-    if (windowEvent->type == SDL_QUIT) {
+    if (windowEvent.type == SDL_QUIT) {
       isLoop = false;
       return;
     }
 
-    switch (windowEvent->type) {
+    switch (windowEvent.type) {
     // Handle Key Presses
     case SDL_KEYDOWN:
     case SDL_KEYUP:
@@ -40,11 +40,12 @@ int main() {
   SDL_Texture *texture;                   // Default SDL Texture that is Stretch onto entire Window (Renderer)
 
   // Window Data
-  const char *title = "RetroPixelEngine"; // Default Window Title
+  const char *title = "YAGB-Emu";         // Default Window Title
   char titleBuffer[256];                  // Used for Temporary Character Storage (Window Title)
   const int WIDTH_pixel = 400;
   const int HEIGHT_pixel = 400;
   const int RES_SCALE = 1;
+
 
 
   /* Configure SDL Properties */
@@ -67,26 +68,33 @@ int main() {
       WIDTH_pixel,
       HEIGHT_pixel);
 
+  /* FPS Cap */
+  const int CAP_FPS = 60;
+  const int TICKS_PER_FRAME = 1000 / CAP_FPS;
+
+
   /* Start Looping */
-  uint32_t frameCount = 0;
   uint32_t overallFrameCount = 0;
   uint32_t lastTime = SDL_GetTicks();
 
   while (isLoop) {
     // Measure the Speed (FPS)
     uint32_t currentTime = SDL_GetTicks();
-    frameCount++;
-    if (currentTime - lastTime >= 1000) { // 1 Second Elapsed
-      frameCount = 0;
-      lastTime += 1000;
+    float avgFPS = overallFrameCount / ((SDL_GetTicks() - lastTime) / 1000.f);
+    if ( avgFPS > 2000000) {
+      avgFPS = 0;
     }
 
     // Handle Event Polling
     handleEventPolling();
 
     // Update Title: Output FPS to Window Title
-    sprintf(titleBuffer, "%s [%.2f FPS]", title, frameCount);
+    sprintf(titleBuffer, "%s [%.2f FPS]", title, avgFPS);
     SDL_SetWindowTitle(window, titleBuffer);
+
+    // Clear Screen
+    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    SDL_RenderClear(renderer);
 
     // Draw Here...
     SDL_RenderCopy(renderer, texture, nullptr, nullptr);
@@ -94,6 +102,12 @@ int main() {
 
     // Keep Track of Overall FrameCount
     overallFrameCount++;
+
+    // Frame Early Finish
+    int frameTicks = SDL_GetTicks() - currentTime;
+    if (frameTicks < TICKS_PER_FRAME) {
+      SDL_Delay(TICKS_PER_FRAME - frameTicks);
+    }
   }
 
 
