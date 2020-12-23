@@ -1,3 +1,5 @@
+#define SDL_MAIN_HANDLED
+
 #include <SDL2/SDL.h>
 #include <iostream>
 
@@ -72,7 +74,7 @@ int main() {
 
   while (isLoop) {
     // Measure the Speed (FPS)
-    u_int32_t currentTime = SDL_GetTicks();
+    uint32_t currentTime = SDL_GetTicks();
     frameCount++;
     if (currentTime - lastTime >= 1000) { // 1 Second Elapsed
       frameCount = 0;

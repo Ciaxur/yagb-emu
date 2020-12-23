@@ -1,15 +1,31 @@
-# Project Variables
+MAIN = src/main.cc
+BUILD = build
 CC = g++
 FLAGS = -I include
-SDL_FLAG = -lSDL2
-MAIN = src/main.cc
-OUT = app
+OUT = $(BUILD)/yagb-emu
 
-
-all: build
+# Windows / Linux Variables
+ifeq ($(OS),Windows_NT)
+$(info Windows Variables Init)
+	FLAGS += -I C:\MinGW\SDL2\include -L C:\MinGW\SDL2\lib\x86
+    FLAGS += -w -Wl,-subsystem,windows -lmingw32 -lSDL2main -lSDL2
+else
+$(info Non-Windows Variables Init)
+	FLAGS += $(shell sdl2-config --cflags --libs)
+endif
 
 build:
-	$(CC) $(FLAGS) $(SDL_FLAG) $(MAIN) -o $(OUT)
+ifeq ($(wildcard $(BUILD)),)
+	$(shell mkdir $(BUILD))
+endif
+	$(CC) $(MAIN) $(FLAGS) -o $(OUT)
+	$(info Building Binary)
 
 clean:
-	rm $(OUT)
+ifeq ($(OS),Windows_NT)
+	$(info Windows Remove)
+	$(shell rmdir /Q /S $(BUILD))
+else
+	$(info Removing Build)
+	rm -rf $(BUILD)
+endif
