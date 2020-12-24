@@ -1,14 +1,16 @@
-MAIN = src/main.cc
+MAIN = $(wildcard src/*.cc)
 BUILD = build
 CC = g++
-FLAGS = -I include
+INCLUDES = -I ./include
+FLAGS =
 OUT = $(BUILD)/yagb-emu
 
 # Windows / Linux Variables
 ifeq ($(OS),Windows_NT)
 $(info Windows Variables Init)
-	FLAGS += -I C:\MinGW\SDL2\include -L C:\MinGW\SDL2\lib\x86
-    FLAGS += -w -Wl,-subsystem,windows -lmingw32 -lSDL2main -lSDL2
+	INCLUDES += -I C:\MinGW\SDL2\include -L C:\MinGW\SDL2\lib\x86
+    #FLAGS += -w -Wl,-subsystem,windows -lmingw32 -lSDL2main -lSDL2
+    FLAGS += -w -lmingw32 -lSDL2main -lSDL2
 else
 $(info Non-Windows Variables Init)
 	FLAGS += $(shell sdl2-config --cflags --libs)
@@ -18,7 +20,7 @@ build:
 ifeq ($(wildcard $(BUILD)),)
 	$(shell mkdir $(BUILD))
 endif
-	$(CC) $(MAIN) $(FLAGS) -o $(OUT)
+	$(CC) $(MAIN) $(INCLUDES) $(FLAGS) -o $(OUT)
 	$(info Building Binary)
 
 clean:

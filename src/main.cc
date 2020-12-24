@@ -3,7 +3,6 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 
-
 // Global Variables
 SDL_Window *window;
 bool isLoop = true;
@@ -33,9 +32,10 @@ void handleEventPolling() {
 }
 
 
-int main() {
+int main(int argc, char **argv) {
+  std::cout << "Starting YAGB-Emu..." << std::endl;
+
   // SDL Variables
-  
   SDL_Renderer *renderer;                 // Default SDL Renderer Used
   SDL_Texture *texture;                   // Default SDL Texture that is Stretch onto entire Window (Renderer)
 
@@ -45,8 +45,6 @@ int main() {
   const int WIDTH_pixel = 400;
   const int HEIGHT_pixel = 400;
   const int RES_SCALE = 1;
-
-
 
   /* Configure SDL Properties */
   // Initialize Window, Renderer, & Texture
@@ -76,20 +74,24 @@ int main() {
   /* Start Looping */
   uint32_t overallFrameCount = 0;
   uint32_t lastTime = SDL_GetTicks();
+  uint32_t frameCount = 0;
+  uint32_t FPS = 0;
 
   while (isLoop) {
     // Measure the Speed (FPS)
     uint32_t currentTime = SDL_GetTicks();
-    float avgFPS = overallFrameCount / ((SDL_GetTicks() - lastTime) / 1000.f);
-    if ( avgFPS > 2000000) {
-      avgFPS = 0;
+    frameCount++;
+    if (currentTime - lastTime >= 1000) {   // 1 Second Elapsed
+      FPS = frameCount;
+      frameCount = 0;
+      lastTime += 1000;
     }
 
     // Handle Event Polling
     handleEventPolling();
 
     // Update Title: Output FPS to Window Title
-    sprintf(titleBuffer, "%s [%.2f FPS]", title, avgFPS);
+    sprintf(titleBuffer, "%s [%d FPS]", title, FPS);
     SDL_SetWindowTitle(window, titleBuffer);
 
     // Clear Screen
