@@ -11,7 +11,8 @@
 
 class CPU {
 private:
-    std::unordered_map<std::string, Opcode> opcodeMap;
+    std::unordered_map<std::string, Opcode*> oMap; // Opcode Map
+    std::unordered_map<std::string, Opcode*> pMap; // Prefix Map
     uint8_t reg[8];     // A,B,C,D,E,H,L
     uint16_t PC;
     uint16_t SP;
@@ -23,5 +24,6 @@ private:
     void executeInstructions(int cycles);
 public:
     CPU(std::string ROMPath);
+    ~CPU();
     void nextFrame();               // Runs 60 Iterations / Seconds until no more free cycles pre Frame
 };

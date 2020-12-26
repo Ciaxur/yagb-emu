@@ -10,9 +10,24 @@ CPU::CPU(std::string ROMPath): memory(ROMPath) {
   // Default Values
   cyclesLeftInCurrentFrame = TOTAL_FRAME_CYCLES;
   
-  // Initialize the Opcode Map
-  initOpcodes(this->opcodeMap);
+  // Initialize the Opcode & Prefix Map
+  initOpcodes(this->oMap);
+  initPrefixed(this->pMap);
 }
+
+/**
+ * Frees up memory used
+ *  - Opcode Map Pointers
+ */
+CPU::~CPU() {
+  // Free up Mapped Opcode Execute Methods
+  for (auto key: this->oMap) {
+    delete key.second;
+  }
+  for (auto key: this->pMap) {
+    delete key.second;
+  }
+};
 
 
 // TODO:
