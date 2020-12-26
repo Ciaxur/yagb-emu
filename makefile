@@ -16,13 +16,31 @@ $(info Non-Windows Variables Init)
 	FLAGS += $(shell sdl2-config --cflags --libs)
 endif
 
-build:
+
+
+all: build
+
+# Builds a Development Binary of the Application
+build: prebuild
 ifeq ($(wildcard $(BUILD)),)
 	$(shell mkdir $(BUILD))
 endif
 	$(CC) $(MAIN) $(INCLUDES) $(FLAGS) -o $(OUT)
 	$(info Building Binary)
 
+# Cleans up the Build Directory
+prebuild:
+ifneq (,$(wildcard $(OUT)))
+ifeq ($(OS),Windows_NT)
+	$(info Windows Remove Pre-build)
+	$(shell del /F /A $(OUT))
+else
+	$(info Removing Build Pre-build)
+	rm $(OUT)
+endif	
+endif
+
+# Cleans up everything
 clean:
 ifeq ($(OS),Windows_NT)
 	$(info Windows Remove)

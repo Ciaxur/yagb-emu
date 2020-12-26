@@ -6,6 +6,9 @@
 #include "Opcode.h"
 #include "Memory.h"
 
+// Pre-defined Macros
+#define TOTAL_FRAME_CYCLES 17556
+
 class CPU {
 private:
     std::unordered_map<std::string, Opcode> opcodeMap;
@@ -13,12 +16,12 @@ private:
     uint16_t PC;
     uint16_t SP;
     Memory memory;
-    // PPU
-    int cyclesLeftInCurrentFrame;   // Default 17556
+    // TODO: PPU
+    int cyclesLeftInCurrentFrame;   // Total 17556
+    
     void handleInterrupt();
+    void executeInstructions(int cycles);
 public:
     CPU(std::string ROMPath);
-    void nextFrame();               // Runs 60 Iterations / Seconds until no more free cycles
-    void executeInstruction(int cycles);
+    void nextFrame();               // Runs 60 Iterations / Seconds until no more free cycles pre Frame
 };
-

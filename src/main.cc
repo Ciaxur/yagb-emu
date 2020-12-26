@@ -2,6 +2,7 @@
 
 #include <SDL2/SDL.h>
 #include <iostream>
+#include "../include/CPU.h"
 
 // Global Variables
 SDL_Window *window;
@@ -34,6 +35,10 @@ void handleEventPolling() {
 
 int main(int argc, char **argv) {
   std::cout << "Starting YAGB-Emu..." << std::endl;
+
+  // Initiate the CPU
+  std::cout << "Initiating the CPU...\n";
+  CPU cpu("misc/drmario.gb");
 
   // SDL Variables
   SDL_Renderer *renderer;                 // Default SDL Renderer Used
@@ -86,6 +91,9 @@ int main(int argc, char **argv) {
       frameCount = 0;
       lastTime += 1000;
     }
+
+    // Run CPU
+    cpu.nextFrame();
 
     // Handle Event Polling
     handleEventPolling();

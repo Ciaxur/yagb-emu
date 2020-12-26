@@ -1,9 +1,24 @@
 #include "../include/Memory.h"
 
+/**
+ * Initalizes the Memory, populating it
+ *  with the givem ROM Path
+ * @param ROMPath The path of the ROM
+ */
 Memory::Memory(std::string ROMPath) {
+  std::cout << "Initializing Memory...\n";
   dumpROM(ROMPath, disassembledROM);
+
+  // TODO: Populate Memory
+  // TODO: Intitial Values
 }
 
+/**
+ * Dumps the ROM to given Output Stream from
+ *  the given ROM Path
+ * @param ROMPath Path to the ROM that will be loaded
+ * @param out Address of the Output Stream
+ */
 void Memory::dumpROM(std::string ROMPath, std::ostream &out) {
   uint8_t buffer[1000];
   int addr = 0;
@@ -46,3 +61,7 @@ void Memory::dumpROM(std::string ROMPath, std::ostream &out) {
     }
   }
 }
+
+// TODO:
+uint16_t Memory::read(uint16_t address) {}
+void Memory::write(uint16_t address, uint16_t value) {}
