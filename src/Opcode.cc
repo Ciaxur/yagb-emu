@@ -10,7 +10,7 @@
  * @param length Length of the Entire Opcode, including Operands
  * @param exec Pointer to the Function Logic of the Instruction
  */
-Opcode::Opcode(uint8_t opcode, std::string label, uint16_t machineCycles, uint16_t length, std::function<void(void*)> exec) {
+Opcode::Opcode(uint8_t opcode, std::string label, uint16_t machineCycles, uint16_t length, std::function<void()> exec) {
     this->opcode = opcode;
     this->label = label;
     this->machineCycles = machineCycles;

@@ -11,8 +11,8 @@ CPU::CPU(std::string ROMPath): memory(ROMPath) {
   cyclesLeftInCurrentFrame = TOTAL_FRAME_CYCLES;
   
   // Initialize the Opcode & Prefix Map
-  initOpcodes(this->oMap);
-  initPrefixed(this->pMap);
+  this->initOpcodes(this);
+  this->initPrefixed(this);
 }
 
 /**
