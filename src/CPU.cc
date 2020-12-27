@@ -30,6 +30,34 @@ CPU::~CPU() {
 };
 
 
+/**
+ * Sets Half-Carry flag if a half carry occured
+ * @param prev The previous value
+ * @param after Result of the previous value
+ * @return Result of the Set (if needed)
+ */
+void CPU::checkHalfCarry(uint8_t prev, uint8_t after) {
+  this->reg.F &= 0xFD;                    // Unset H Flag
+  if ((prev & 0x0F) != (after & 0x0F))    // LSB Change
+    if ((prev & 0xF0) != (after & 0xF0))  // MSB Change
+      this->reg.F |= 0x02;                // Set H Flag
+}
+
+/**
+ * Sets Carry flag if a carry occured
+ * @param prev The previous value
+ * @param after Result of the previous value
+ * @return Result of the Set (if needed)
+ */
+void CPU::checkCarry(uint16_t prev, uint16_t after) {
+  this->reg.F &= 0xFE;                        // Unset C Flag
+  if ((prev & 0xFF) != (after & 0xFF))        // LSB Change
+    if ((prev & 0xFF00) != (after & 0xFF00))  // MSB Change
+      this->reg.F |= 0x01;                    // Set C Flag
+}
+
+
+
 // TODO:
 void CPU::handleInterrupt() {}
 void CPU::nextFrame() {}

@@ -25,20 +25,53 @@ void CPU::initOpcodes(CPU* cpu) {
       // New B Value
       uint8_t B = cpu->reg.B + 1;
 
-      // Unset Neg. Flag
-      cpu->reg.F &= 0xFB;
-
       // Set Zero Flag
       if (B == 0)
         cpu->reg.F |= 0x80;
+      
+      // Unset Neg. Flag
+      cpu->reg.F &= 0xFB;
 
+      
       // Half Carry
-      if (cpu->reg.B <= 0x0F && B > 0x0F)
-        cpu->reg.F |= 0x02;
+      cpu->checkHalfCarry(cpu->reg.B, B);
 
       // Set New B Value
       cpu->reg.B = B;
   });
+  cpu->oMap[0x05] = new Opcode (0x05, "DEC B", 1, 1, [&]() {
+    uint8_t B = cpu->reg.B - 1;
+
+    // Flags
+    if (B == 0)   // Zero Flag
+      cpu->reg.F |= 0x80;
+
+    // Set Negative Flag
+    cpu->reg.F |= 0x40;
+
+    // Half Carry
+    cpu->checkHalfCarry(cpu->reg.B, B);
+
+    // Set new B Reg Value
+    cpu->reg.B = B;
+  });
+  cpu->oMap[0x06] = new Opcode(0x06, "LD, B, u8", 2, 2, [&]() {
+    cpu->reg.B = cpu->memory.read(cpu->PC);
+  });
+  cpu->oMap[0x07] = new Opcode(0x07, "RLCA", 1, 1, [&]() {
+    // Reset Flags
+    cpu->reg.F = 0x00;
+    
+    uint8_t A = cpu->reg.A;
+    if (A & 0x80) {         // Left Most Bit
+      A = (A << 1) | 0x01;  // Set right most bit
+      cpu->reg.F |= 0x01;   // There was a carry
+    } else {
+      A = A << 1;           // No Carry
+    }
+    cpu->reg.A = A;
+  });
+
 
   // 10 - 1F
 

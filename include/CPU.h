@@ -35,6 +35,10 @@ private:
     void handleInterrupt();
     void executeInstructions(int cycles);
 
+    // Flag Methods
+    void checkCarry(uint16_t prev, uint16_t after);
+    void checkHalfCarry(uint8_t prev, uint8_t after);
+
     // Initializers
     static void initOpcodes(CPU* cpu);
     static void initPrefixed(CPU* cpu);
