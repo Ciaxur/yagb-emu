@@ -67,6 +67,45 @@ protected:
     void DEC(uint8_t *r1, uint8_t *r2);   // DEC r16
     void INC(uint8_t *r1, uint8_t *r2);   // INC r16
 
+    /* Bit Operations Instructions */
+    void BIT(uint8_t u3, uint8_t *r8);    // BIT u3, r8
+    void BIT(uint8_t u3, uint16_t a16);   // BIT u3, [HL]
+
+    void RES(uint8_t u3, uint8_t *r8);    // RES u3, r8
+    void RES(uint8_t u3, uint16_t a16);   // RES u3, [HL]
+
+    void SET(uint8_t u3, uint8_t *r8);    // SET u3, r8
+    void SET(uint8_t u3, uint16_t a16);   // SET u3, [HL]
+
+    void SWAP(uint8_t *r8);               // SWAP r8
+    void SWAP(uint16_t a16);              // SWAP [HL]
+
+    /* Bit Shift Instructions */
+    void RL(uint8_t *r8);                 // RL r8
+    void RL(uint16_t a16);                // RL [HL]
+    void RLA();                           // RLA
+
+    void RLC(uint8_t *r8);                // RLC r8
+    void RLC(uint16_t a16);               // RLC [HL]
+    void RLCA();                          // RLCA
+
+    void RR(uint8_t *r8);                 // RR r8
+    void RR(uint16_t a16);                // RR [HL]
+    void RRA();                           // RRA
+
+    void RRC(uint8_t *r8);                // RRC r8
+    void RRC(uint16_t a16);               // RRC [HL]
+    void RRCA();                          // RRCA
+
+    void SLA(uint8_t *r8);                // SLA r8
+    void SLA(uint16_t a16);               // SLA [HL]
+
+    void SRA(uint8_t *r8);                // SRA r8
+    void SRA(uint16_t a16);               // SRA [HL]
+
+    void SRL(uint8_t *r8);                // SRL r8
+    void SRL(uint16_t a16);               // SRL [HL]
+
 private:
     std::unordered_map<uint16_t, Opcode*> oMap; // Opcode Map
     std::unordered_map<uint16_t, Opcode*> pMap; // Prefix Map

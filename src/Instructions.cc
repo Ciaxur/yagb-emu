@@ -1,6 +1,7 @@
 #include "../include/CPU.h"
 
 /* 8-bit Arithmetic and Logic Instructions */
+
 void CPU::ADC(uint8_t *r8) {                // ADC A, r8
   this->ADC(*r8);
 }
@@ -245,4 +246,228 @@ void CPU::INC(uint8_t *r1, uint8_t *r2) {    // INC r16
 
   *r1 = result >> 8;
   *r2 = result & 0xFF;
+}
+
+/* Bit Operations Instructions */
+
+void CPU::BIT(uint8_t u3, uint8_t *r8) {     // BIT u3, r8
+  // Check bit at u3 in r8's Bytes
+  // Shift byte to u3 Bit to check if R8 Bit is set
+  if ( ((1 << u3) & *r8) == 0 ) {
+    this->setZeroFlag(true);
+  }
+  this->setAddSubFlag(false);
+  this->setHalfCarryFlag(true);
+}
+
+void CPU::BIT(uint8_t u3, uint16_t a16) {    // BIT u3, [HL]
+  uint8_t value = this->memory.read(a16);
+  this->BIT(u3, &value);
+  this->memory.write(a16, value);
+}
+
+void CPU::RES(uint8_t u3, uint8_t *r8) {     // RES u3, r8
+  // CLEAR bit at u3 in r8's Bytes
+  // Shift byte to u3 Bit
+  *r8 = ~(1 << u3) & *r8;
+}
+
+void CPU::RES(uint8_t u3, uint16_t a16) {    // RES u3, [HL]
+  uint8_t value = this->memory.read(a16);
+  this->RES(u3, &value);
+  this->memory.write(a16, value);
+}
+
+void CPU::SET(uint8_t u3, uint8_t *r8) {    // SET u3, r8
+  *r8 = (1 << u3) | *r8;
+}
+
+void CPU::SET(uint8_t u3, uint16_t a16) {   // SET u3, [HL]
+  uint8_t value = this->memory.read(a16);
+  this->SET(u3, &value);
+  this->memory.write(a16, value);
+}
+
+void CPU::SWAP(uint8_t *r8) {               // SWAP r8
+  uint8_t L = *r8 >> 4;
+  uint8_t R = *r8 << 4;
+  uint8_t result = L | R;
+
+  // Set Flags
+  if (result == 0)                     // Zero Flag
+    this->setZeroFlag(true);
+  this->setAddSubFlag(false);     // Unset N Flag
+  this->setHalfCarryFlag(false);  // Unset Half Carry Flag
+  this->setCarryFlag(false);      // Unset Carry Flag
+}
+
+void CPU::SWAP(uint16_t a16) {             // SWAP [HL]
+  uint8_t value = this->memory.read(a16);
+  this->SWAP(&value);
+  this->memory.write(a16, value);
+}
+
+/* Bit Shift Instructions */
+
+void CPU::RL(uint8_t *r8) {                // RL r8
+  uint8_t carry = this->reg.F & 0x01;
+
+  // Set Carry flag according to 7th Bit
+  this->setCarryFlag((*r8 & 0x80) != 0);
+
+  *r8 = (*r8 << 1) | carry;  // Set right most bit
+
+  // Set Flags
+  if (*r8 == 0)
+    this->setZeroFlag(true);
+  this->setAddSubFlag(false);
+  this->setHalfCarryFlag(false);
+}
+
+void CPU::RL(uint16_t a16) {               // RL [HL]
+  uint8_t value = this->memory.read(a16);
+  this->RL(&value);
+  this->memory.write(a16, value);
+}
+
+void CPU::RLA() {                          // RLA
+  this->RL(&this->reg.A);
+  this->setZeroFlag(false);
+}
+
+void CPU::RLC(uint8_t *r8) {               // RLC r8
+  // Set Carry flag according to 7th Bit
+  this->setCarryFlag((*r8 & 0x80) != 0);
+
+  // Carry 7th Bit over
+  *r8 = (*r8 << 1) | (this->reg.F & 0x01);
+
+  // Set Flags
+  if (*r8 == 0)
+    this->setZeroFlag(true);
+  this->setAddSubFlag(false);
+  this->setHalfCarryFlag(false);
+}
+
+void CPU::RLC(uint16_t a16) {              // RLC [HL]
+  uint8_t value = this->memory.read(a16);
+  this->RLC(&value);
+  this->memory.write(a16, value);
+}
+
+void CPU::RLCA() {                         // RLCA
+  this->RLC(&this->reg.A);
+  this->setZeroFlag(false);
+}
+
+void CPU::RR(uint8_t *r8) {                // RR r8
+  uint8_t carry = this->reg.F & 0x01;
+
+  // Set Carry flag according to 7th Bit
+  this->setCarryFlag((*r8 & 0x01) != 0);
+
+  *r8 = (*r8 >> 1) | carry;  // Set left most bit
+
+  // Set Flags
+  if (*r8 == 0)
+    this->setZeroFlag(true);
+  this->setAddSubFlag(false);
+  this->setHalfCarryFlag(false);
+}
+
+void CPU::RR(uint16_t a16) {               // RR [HL]
+  uint8_t value = this->memory.read(a16);
+  this->RR(&value);
+  this->memory.write(a16, value);
+}
+
+void CPU::RRA() {                          // RRA
+  this->RL(&this->reg.A);
+  this->setZeroFlag(false);
+}
+
+void CPU::RRC(uint8_t *r8) {                // RRC r8
+  // Set Carry flag according to 7th Bit
+  this->setCarryFlag((*r8 & 0x01) != 0);
+
+  // Carry 7th Bit over
+  *r8 = (*r8 >> 1) | (this->reg.F & 0x01);
+
+  // Set Flags
+  if (*r8 == 0)
+    this->setZeroFlag(true);
+  this->setAddSubFlag(false);
+  this->setHalfCarryFlag(false);
+}
+
+void CPU::RRC(uint16_t a16) {              // RRC [HL]
+  uint8_t value = this->memory.read(a16);
+  this->RRC(&value);
+  this->memory.write(a16, value);
+}
+
+void CPU::RRCA() {                         // RRCA
+  this->RRC(&this->reg.A);
+  this->setZeroFlag(false);
+}
+
+void CPU::SLA(uint8_t *r8) {               // SLA r8
+  // Set Carry from Left Shift
+  this->setCarryFlag((*r8 & 0x80) != 0);
+
+  // Shift Left
+  *r8 = *r8 << 1;
+
+  // Set Flags
+  if (*r8 == 0)
+    this->setZeroFlag(true);
+  this->setAddSubFlag(false);
+  this->setHalfCarryFlag(false);
+}
+
+void CPU::SLA(uint16_t a16) {              // SLA [HL]
+  uint8_t value = this->memory.read(a16);
+  this->SLA(&value);
+  this->memory.write(a16, value);
+}
+
+void CPU::SRA(uint8_t *r8) {               // SRA r8
+  // Set Carry from Right Shift
+  this->setCarryFlag((*r8 & 0x01) != 0);
+
+  // Shift Arithmetic Right
+  uint8_t topBit = *r8 & 0x80;
+  *r8 = topBit | (*r8 >> 1);
+
+  // Set Flags
+  if (*r8 == 0)
+    this->setZeroFlag(true);
+  this->setAddSubFlag(false);
+  this->setHalfCarryFlag(false);
+}
+
+void CPU::SRA(uint16_t a16) {              // SRA [HL]
+  uint8_t value = this->memory.read(a16);
+  this->SRA(&value);
+  this->memory.write(a16, value);
+}
+
+void CPU::SRL(uint8_t *r8) {                // SRL r8
+  // Set Carry from Right Shift
+  this->setCarryFlag((*r8 & 0x01) != 0);
+
+  // Shift Logic Right
+  *r8 = *r8 >> 1;
+
+  // Set Flags
+  if (*r8 == 0)
+    this->setZeroFlag(true);
+  this->setAddSubFlag(false);
+  this->setHalfCarryFlag(false);
+}
+
+void CPU::SRL(uint16_t a16) {               // SRL [HL]
+  uint8_t value = this->memory.read(a16);
+  this->SRL(&value);
+  this->memory.write(a16, value);
 }
