@@ -232,20 +232,20 @@ void CPU::ADD_HL(uint16_t r16) {             // ADD HL, r16
   this->reg.L = result & 0xFF;
 }
 
-void CPU::DEC(uint8_t *r1, uint8_t *r2) {    // DEC r16
-  uint16_t r16 = (*r1 << 8) | *r2;
+void CPU::DEC(uint8_t *ru, uint8_t *rl) {    // DEC r16
+  uint16_t r16 = (*ru << 8) | *rl;
   uint16_t result = r16--;
 
-  *r1 = result >> 8;
-  *r2 = result & 0xFF;
+  *ru = result >> 8;
+  *rl = result & 0xFF;
 }
 
-void CPU::INC(uint8_t *r1, uint8_t *r2) {    // INC r16
-  uint16_t r16 = (*r1 << 8) | *r2;
+void CPU::INC(uint8_t *ru, uint8_t *rl) {    // INC r16
+  uint16_t r16 = (*ru << 8) | *rl;
   uint16_t result = r16++;
 
-  *r1 = result >> 8;
-  *r2 = result & 0xFF;
+  *ru = result >> 8;
+  *rl = result & 0xFF;
 }
 
 /* Bit Operations Instructions */
@@ -471,3 +471,117 @@ void CPU::SRL(uint16_t a16) {               // SRL [HL]
   this->SRL(&value);
   this->memory.write(a16, value);
 }
+
+/* Load Instructions */
+
+void CPU::LD(uint8_t *r1, uint8_t *r2) {    // LD r8, r8
+  *r1 = *r2;
+}
+
+void CPU::LD(uint8_t *r8, uint8_t u8) {     // LD r8, u8
+  *r8 = u8;
+}
+
+void CPU::LD(uint8_t *ru, uint8_t *rl, uint16_t u16) { // LD r16, u16
+  *ru = u16 >> 8;
+  *rl = u16 & 0xFF;
+}
+
+void CPU::LD(uint16_t a16, uint8_t *r8) {   // LD [HL], r8
+  this->memory.write(a16, *r8);
+}
+
+void CPU::LD(uint16_t a16, uint8_t u8){     // LD [HL], u8
+  this->memory.write(a16, u8);
+}
+
+void CPU::LD(uint8_t *r8, uint16_t a16) {   // LD r8, [HL]
+  *r8 = this->memory.read(a16);
+}
+
+void CPU::LD(uint16_t a16) {                // LD [r16], A | LD [u16], A
+  this->memory.write(a16, this->reg.A);
+}
+
+void CPU::LDH(uint16_t a16) {               // LDH [n16], A
+  if (a16 >= 0xFF00 && a16 <= 0xFFFF) {
+    this->memory.write(a16, this->reg.A);
+  }
+}
+
+void CPU::LDHCA() {                          // LDH [C], A
+  this->memory.write(0xFF00 + this->reg.C, this->reg.A);
+}
+
+void CPU::LDA(uint16_t a16) {               // LD A, [r16] | LD A, [u16]
+  this->reg.A = this->memory.read(a16);
+}
+
+void CPU::LDHA(uint16_t a16) {              // LD A, [n16]
+  if (a16 >= 0xFF00 && a16 <= 0xFFFF) {
+    this->reg.A = this->memory.read(a16);
+  }
+}
+
+void CPU::LDHAC(){                         // LDH A, [C]
+  this->reg.A = this->memory.read(0xFF00 + this->reg.C);
+}
+
+void CPU::LDHLI() {            // LD [HLI], A
+  uint16_t HL = (this->reg.H << 8) | this->reg.L;
+
+  this->memory.write(HL, this->reg.A);
+  HL++;
+
+  this->reg.H = HL >> 8;
+  this->reg.L = HL & 0xFF;
+}
+
+void CPU::LDHLD() {                         // LD [HLD], A
+  uint16_t HL = (this->reg.H << 8) | this->reg.L;
+
+  this->memory.write(HL, this->reg.A);
+  HL--;
+
+  this->reg.H = HL >> 8;
+  this->reg.L = HL & 0xFF;
+}
+
+void CPU::LDAHLI() {                        // LD A, [HLI]
+  uint16_t HL = (this->reg.H << 8) | this->reg.L;
+
+  this->reg.A = this->memory.read(HL);
+  HL++;
+
+  this->reg.H = HL >> 8;
+  this->reg.L = HL & 0xFF;
+}
+
+void CPU::LDAHLD(){                        // LD A, [HLD]
+  uint16_t HL = (this->reg.H << 8) | this->reg.L;
+
+  this->reg.A = this->memory.read(HL);
+  HL--;
+
+  this->reg.H = HL >> 8;
+  this->reg.L = HL & 0xFF;
+}
+
+/* Jumps and Subroutines */
+
+void CPU::CALL(uint16_t u16) {                  // CALL, u16
+  // Push Address to Stack
+//  this->PUSH(&this->PC);
+
+  // JP to address
+  this->PC = u16;
+}
+
+void CPU::CALL(ConditionCode cc, uint16_t a16) {   // CALL cc, u16
+
+}
+
+void CPU::JP(uint16_t a16) {                    // JP HL | JP u16
+  this->PC = a16;
+}
+

@@ -20,6 +20,9 @@ struct Register {
     uint8_t L;
 };
 
+enum ConditionCode { Z, NZ, C, NC };
+
+
 class CPU {
 protected:
     // CPU Instruction model based on RGBDS v0.4.2 documentation
@@ -64,8 +67,8 @@ protected:
 
     // 16-bit Arithmetic Instructions
     void ADD_HL(uint16_t r16);            // ADD HL, r16
-    void DEC(uint8_t *r1, uint8_t *r2);   // DEC r16
-    void INC(uint8_t *r1, uint8_t *r2);   // INC r16
+    void DEC(uint8_t *ru, uint8_t *rl);   // DEC r16
+    void INC(uint8_t *ru, uint8_t *rl);   // INC r16
 
     /* Bit Operations Instructions */
     void BIT(uint8_t u3, uint8_t *r8);    // BIT u3, r8
@@ -106,6 +109,45 @@ protected:
     void SRL(uint8_t *r8);                // SRL r8
     void SRL(uint16_t a16);               // SRL [HL]
 
+    /* Load Instructions */
+    void LD(uint8_t *r1, uint8_t *r2);    // LD r8, r8
+    void LD(uint8_t *r8, uint8_t u8);     // LD r8, u8
+    void LD(uint8_t *ru, uint8_t *rl, uint16_t u16); // LD r16, u16
+
+    void LD(uint16_t a16, uint8_t *r8);   // LD [HL], r8
+    void LD(uint16_t a16, uint8_t u8);    // LD [HL], u8
+    void LD(uint8_t *r8, uint16_t a16);   // LD r8, [HL]
+
+    void LD(uint16_t a16);                // LD [r16], A | LD [u16], A
+
+    void LDH(uint16_t a16);               // LDH [u16], A
+    void LDHCA();                         // LDH [C], A
+
+    void LDA(uint16_t a16);               // LD A, [r16] | LD A, [u16]
+
+    void LDHA(uint16_t a16);              // LD A, [u16]
+    void LDHAC();                         // LDH A, [C]
+
+    void LDHLI();                         // LD [HLI], A
+    void LDHLD();                         // LD [HLD], A
+
+    void LDAHLI();                        // LD A, [HLI]
+    void LDAHLD();                        // LD A, [HLD]
+
+    /* Jumps and Subroutines */
+    void CALL(uint16_t a16);              // CALL, u16
+    void CALL(ConditionCode cc, uint16_t a16);  // CALL cc, u16
+
+    void JP(uint16_t a16);                // JP HL | JP u16
+    void JP(ConditionCode cc, uint16_t a16);    // JP cc, u16
+
+
+    /* Stack Operations Instructions */
+    void POPAF();                         // POP AF
+    void POP(uint16_t *r16);              // POP r16
+    void PUSHAF();                        // PUSH AF
+    void PUSH(uint16_t *r16);             // PUSH r16
+
 private:
     std::unordered_map<uint16_t, Opcode*> oMap; // Opcode Map
     std::unordered_map<uint16_t, Opcode*> pMap; // Prefix Map
@@ -133,6 +175,7 @@ private:
     // Initializers
     static void initOpcodes(CPU* cpu);
     static void initPrefixed(CPU* cpu);
+
 public:
     CPU(std::string ROMPath);
     ~CPU();
