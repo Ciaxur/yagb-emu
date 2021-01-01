@@ -569,6 +569,7 @@ void CPU::LDAHLD(){                        // LD A, [HLD]
 
 /* Jumps and Subroutines */
 
+// TODO: Call Push after PUSH implemented
 void CPU::CALL(uint16_t u16) {                  // CALL, u16
   // Push Address to Stack
 //  this->PUSH(&this->PC);
@@ -578,10 +579,108 @@ void CPU::CALL(uint16_t u16) {                  // CALL, u16
 }
 
 void CPU::CALL(ConditionCode cc, uint16_t a16) {   // CALL cc, u16
-
+  switch (cc) {
+    case Z:
+      if ((this->reg.F & 0x80) != 0)
+        this->CALL(a16);
+      break;
+    case NZ:
+      if ((this->reg.F & 0x80) == 0)
+        this->CALL(a16);
+      break;
+    case C:
+      if ((this->reg.F & 0x10) != 0)
+        this->CALL(a16);
+      break;
+    case NC:
+      if ((this->reg.F & 0x10) == 0)
+        this->CALL(a16);
+      break;
+  }
 }
 
 void CPU::JP(uint16_t a16) {                    // JP HL | JP u16
   this->PC = a16;
+}
+
+void CPU::JP(ConditionCode cc, uint16_t a16) {  // JP cc, u16
+  switch (cc) {
+    case Z:
+      if ((this->reg.F & 0x80) != 0)
+        this->JP(a16);
+      break;
+    case NZ:
+      if ((this->reg.F & 0x80) == 0)
+        this->JP(a16);
+      break;
+    case C:
+      if ((this->reg.F & 0x10) != 0)
+        this->JP(a16);
+      break;
+    case NC:
+      if ((this->reg.F & 0x10) == 0)
+        this->JP(a16);
+      break;
+  }
+}
+
+void CPU::JR(int8_t e8) {                       // JR e8
+  this->PC = static_cast<uint16_t>(e8 + this->PC);
+}
+
+void CPU::JR(ConditionCode cc, int8_t e8) {     // JR cc, e8
+  switch (cc) {
+    case Z:
+      if ((this->reg.F & 0x80) != 0)
+        this->JR(e8);
+      break;
+    case NZ:
+      if ((this->reg.F & 0x80) == 0)
+        this->JR(e8);
+      break;
+    case C:
+      if ((this->reg.F & 0x10) != 0)
+        this->JR(e8);
+      break;
+    case NC:
+      if ((this->reg.F & 0x10) == 0)
+        this->JR(e8);
+      break;
+  }
+}
+
+void CPU::RET(ConditionCode cc) {                 // RET cc
+  switch (cc) {
+    case Z:
+      if ((this->reg.F & 0x80) != 0)
+        this->RET();
+      break;
+    case NZ:
+      if ((this->reg.F & 0x80) == 0)
+        this->RET();
+      break;
+    case C:
+      if ((this->reg.F & 0x10) != 0)
+        this->RET();
+      break;
+    case NC:
+      if ((this->reg.F & 0x10) == 0)
+        this->RET();
+      break;
+  }
+}
+
+// TODO: Call Pop after POP implemented
+void CPU::RET(){                                // RET
+//  this->POP(&this->PC);
+}
+
+void CPU::RETI() {                              // RETI
+  this->IME = true;
+  this->RET();
+}
+
+void CPU::RST(uint8_t vec){                     // RST vec
+  this->CALL(vec);
 }
 

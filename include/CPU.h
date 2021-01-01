@@ -141,6 +141,13 @@ protected:
     void JP(uint16_t a16);                // JP HL | JP u16
     void JP(ConditionCode cc, uint16_t a16);    // JP cc, u16
 
+    void JR(int8_t e8);                   // JR e8
+    void JR(ConditionCode cc, int8_t e8); // JR cc, e8
+
+    void RET(ConditionCode cc);           // RET cc
+    void RET();                           // RET
+    void RETI();                          // RETI
+    void RST(uint8_t vec);                // RST vec
 
     /* Stack Operations Instructions */
     void POPAF();                         // POP AF
