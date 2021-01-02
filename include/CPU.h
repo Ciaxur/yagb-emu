@@ -66,7 +66,7 @@ protected:
     void XOR(uint8_t u8);                 // XOR A, u8
 
     // 16-bit Arithmetic Instructions
-    void ADD_HL(uint16_t r16);            // ADD HL, r16
+    void ADDHL(uint16_t r16);             // ADD HL, r16 | ADD HL, SP
     void DEC(uint8_t *ru, uint8_t *rl);   // DEC r16
     void INC(uint8_t *ru, uint8_t *rl);   // INC r16
 
@@ -150,16 +150,37 @@ protected:
     void RST(uint8_t vec);                // RST vec
 
     /* Stack Operations Instructions */
+    void ADDSP(int8_t e8);                // ADD SP, e8
+
+    void DECSP();                         // DEC SP
+    void INCSP();                         // INC SP
+
+    void LDSP(uint16_t u16);              // LD SP, u16 | LD SP, HL
+    void LDSP_MEM(uint16_t a16);          // LD [u16], SP
+    void LDHL(int8_t e8);                 // LD HL, SP+e8
+
     void POPAF();                         // POP AF
     void POP(uint16_t *r16);              // POP r16
     void PUSHAF();                        // PUSH AF
     void PUSH(uint16_t *r16);             // PUSH r16
+
+    /* Miscellaneous Instructions */
+    void CCF();                           // CCF
+    void CPL();                           // CPL
+    void DAA();                           // DAA  || TODO: More Research required
+
+    void DI();                            // DI
+    void EI();                            // EI
+
+    void HALT();                          // HALT
+    void SCF();                           // SCF
 
 private:
     std::unordered_map<uint16_t, Opcode*> oMap; // Opcode Map
     std::unordered_map<uint16_t, Opcode*> pMap; // Prefix Map
     Register reg;
     bool IME;
+    bool halted;
     uint16_t PC;
     uint16_t SP;
     Memory memory;
@@ -180,8 +201,8 @@ private:
     void checkCarry(uint8_t prev, uint16_t after);
 
     // Initializers
-    static void initOpcodes(CPU* cpu);
-    static void initPrefixed(CPU* cpu);
+    static void initOpcodes(CPU *cpu);
+    static void initPrefixed(CPU *cpu);
 
 public:
     CPU(std::string ROMPath);

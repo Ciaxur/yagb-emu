@@ -219,7 +219,7 @@ void CPU::XOR(uint8_t u8) {                 // XOR A, u8
 
 /* 16-bit Arithmetic Instructions */
 
-void CPU::ADD_HL(uint16_t r16) {             // ADD HL, r16
+void CPU::ADDHL(uint16_t r16) {             // ADD HL, r16
   uint16_t HL = (this->reg.H << 8) | this->reg.L;
   uint16_t result = HL + r16;
 
@@ -491,7 +491,7 @@ void CPU::LD(uint16_t a16, uint8_t *r8) {   // LD [HL], r8
   this->memory.write(a16, *r8);
 }
 
-void CPU::LD(uint16_t a16, uint8_t u8){     // LD [HL], u8
+void CPU::LD(uint16_t a16, uint8_t u8) {     // LD [HL], u8
   this->memory.write(a16, u8);
 }
 
@@ -523,7 +523,7 @@ void CPU::LDHA(uint16_t a16) {              // LD A, [n16]
   }
 }
 
-void CPU::LDHAC(){                         // LDH A, [C]
+void CPU::LDHAC() {                         // LDH A, [C]
   this->reg.A = this->memory.read(0xFF00 + this->reg.C);
 }
 
@@ -557,7 +557,7 @@ void CPU::LDAHLI() {                        // LD A, [HLI]
   this->reg.L = HL & 0xFF;
 }
 
-void CPU::LDAHLD(){                        // LD A, [HLD]
+void CPU::LDAHLD() {                        // LD A, [HLD]
   uint16_t HL = (this->reg.H << 8) | this->reg.L;
 
   this->reg.A = this->memory.read(HL);
@@ -569,10 +569,9 @@ void CPU::LDAHLD(){                        // LD A, [HLD]
 
 /* Jumps and Subroutines */
 
-// TODO: Call Push after PUSH implemented
 void CPU::CALL(uint16_t u16) {                  // CALL, u16
   // Push Address to Stack
-//  this->PUSH(&this->PC);
+  this->PUSH(&this->PC);
 
   // JP to address
   this->PC = u16;
@@ -670,9 +669,8 @@ void CPU::RET(ConditionCode cc) {                 // RET cc
   }
 }
 
-// TODO: Call Pop after POP implemented
-void CPU::RET(){                                // RET
-//  this->POP(&this->PC);
+void CPU::RET() {                                // RET
+  this->POP(&this->PC);
 }
 
 void CPU::RETI() {                              // RETI
@@ -680,7 +678,111 @@ void CPU::RETI() {                              // RETI
   this->RET();
 }
 
-void CPU::RST(uint8_t vec){                     // RST vec
+void CPU::RST(uint8_t vec) {                     // RST vec
   this->CALL(vec);
 }
 
+/* Stack Operations Instructions */
+
+void CPU::ADDSP(int8_t e8) {                     // ADD SP, e8
+  uint16_t result = this->SP + e8;
+
+  // Set Flags
+  this->setZeroFlag(false);
+  this->setAddSubFlag(false);
+  this->checkHalfCarry(this->SP >> 8, result >> 8);
+  this->checkCarry(this->SP >> 8, result >> 8);
+
+  this->SP = result;
+}
+
+void CPU::DECSP() {                              // DEC SP
+  this->SP -= 1;
+}
+
+void CPU::INCSP() {                              // INC SP
+  this->SP += 1;
+}
+
+void CPU::LDSP(uint16_t u16) {                   // LD SP, u16 | LD SP, HL
+  this->SP = u16;
+}
+
+void CPU::LDSP_MEM(uint16_t a16) {               // LD [u16], SP
+  this->memory.write(a16, uint8_t (this->SP & 0xFF));
+  this->memory.write(a16 + 1, uint8_t (this->SP >> 8));
+}
+
+void CPU::LDHL(int8_t e8) {                      // LD HL, SP+e8
+  uint16_t result = this->SP + e8;
+
+  // Set Flags
+  this->setZeroFlag(false);
+  this->setAddSubFlag(false);
+  this->checkHalfCarry(this->SP >> 8, result >> 8);
+  this->checkCarry(this->SP >> 8, result >> 8);
+
+  // Store into HL
+  this->reg.H = this->SP << 8;
+  this->reg.L = this->SP & 0xFF;
+}
+
+void CPU::POPAF() {                              // POP AF
+  this->reg.F = this->memory.read(this->SP++);
+  this->reg.A = this->memory.read(this->SP++);
+}
+
+void CPU::POP(uint16_t *r16) {                   // POP r16
+  *r16 = this->memory.read(this->SP++) | (this->memory.read(this->SP++) << 8);
+}
+
+void CPU::PUSHAF() {                             // PUSH AF
+  this->memory.write(--SP, this->reg.A);
+  this->memory.write(--SP, this->reg.F);
+}
+
+void CPU::PUSH(uint16_t *r16) {                  // PUSH r16
+  this->memory.write(--SP, uint8_t(*r16 >> 8));
+  this->memory.write(--SP, uint8_t(*r16 & 0xFF));
+}
+
+/* Miscellaneous Instructions */
+
+void CPU::CCF() {                                // CCF
+  // Set Flags
+  this->setAddSubFlag(false);
+  this->setHalfCarryFlag(false);
+  this->reg.F ^= 0x10;
+}
+
+void CPU::CPL() {                                // CPL
+  this->reg.A = ~this->reg.A;
+
+  // Set Flags
+  this->setZeroFlag(false);
+  this->setHalfCarryFlag(false);
+}
+
+// TODO: Implement after thorough research
+void CPU::DAA() {                                // DAA
+  std::cout << "DAA: Implement me!\n";
+}
+
+void CPU::DI() {                                 // DI
+  this->IME = false;
+}
+
+void CPU::EI() {                                 // EI
+  this->IME = true;
+}
+
+void CPU::HALT() {                               // HALT
+  this->halted = true;
+}
+
+void CPU::SCF() {                                // SCF
+  // Set Flags
+  this->setAddSubFlag(false);
+  this->setHalfCarryFlag(false);
+  this->setCarryFlag(true);
+}

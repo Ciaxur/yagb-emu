@@ -9,6 +9,7 @@
 CPU::CPU(std::string ROMPath): memory(ROMPath) {
   // Default Values
   cyclesLeftInCurrentFrame = TOTAL_FRAME_CYCLES;
+  halted = false;
   
   // Initialize the Opcode & Prefix Map
   this->initOpcodes(this);
