@@ -763,9 +763,30 @@ void CPU::CPL() {                                // CPL
   this->setHalfCarryFlag(false);
 }
 
-// TODO: Implement after thorough research
 void CPU::DAA() {                                // DAA
-  std::cout << "DAA: Implement me!\n";
+  uint8_t A = this->reg.A;
+  uint8_t correction = (this->reg.F & 0x01) ? 0x60 : 0x00;
+  bool N_Flag = (this->reg.F & 0x40) != 0;
+
+  // Half Carry or Addition & Bottom Nibble is bigger than 9 (BCD 0-9)
+  if ( ((this->reg.F & 0x20) != 0) || !N_Flag && ((A & 0x0F) > 0x09) ) {
+    correction |= 0x06;   // Adjust Bottom NIBBLE
+  }
+
+  // Carry or Addition & Top Nibble is bigger than 9
+  if ( ((this->reg.F & 0x10) != 0) || (N_Flag && (A > 0x99)) ) {
+    correction |= 0x60;   // Adjust Top NIBBLE
+  }
+
+  // Set Flags
+  this->setZeroFlag(A);
+  this->setHalfCarryFlag(false);
+  if (correction & 0x60) {
+    this->setCarryFlag(true);
+  }
+
+  // Set the Value
+  this->reg.A = N_Flag ? (A - correction) : (A + correction);
 }
 
 void CPU::DI() {                                 // DI

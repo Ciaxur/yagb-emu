@@ -167,7 +167,7 @@ protected:
     /* Miscellaneous Instructions */
     void CCF();                           // CCF
     void CPL();                           // CPL
-    void DAA();                           // DAA  || TODO: More Research required
+    void DAA();                           // DAA
 
     void DI();                            // DI
     void EI();                            // EI
