@@ -161,8 +161,10 @@ protected:
 
     void POPAF();                         // POP AF
     void POP(uint16_t *r16);              // POP r16
+    void POP(uint8_t *ru, uint8_t *rl);   // POP r16
     void PUSHAF();                        // PUSH AF
     void PUSH(uint16_t *r16);             // PUSH r16
+    void PUSH(uint8_t *ru, uint8_t *rl);  // PUSH r16
 
     /* Miscellaneous Instructions */
     void CCF();                           // CCF

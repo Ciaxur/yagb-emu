@@ -736,6 +736,11 @@ void CPU::POP(uint16_t *r16) {                   // POP r16
   *r16 = this->memory.read(this->SP++) | (this->memory.read(this->SP++) << 8);
 }
 
+void CPU::POP(uint8_t *ru, uint8_t *rl) {        // POP r16
+  *rl = this->memory.read(this->SP++);  // Lower First (Little Endian)
+  *ru = this->memory.read(this->SP++);
+}
+
 void CPU::PUSHAF() {                             // PUSH AF
   this->memory.write(--SP, this->reg.A);
   this->memory.write(--SP, this->reg.F);
@@ -744,6 +749,11 @@ void CPU::PUSHAF() {                             // PUSH AF
 void CPU::PUSH(uint16_t *r16) {                  // PUSH r16
   this->memory.write(--SP, uint8_t(*r16 >> 8));
   this->memory.write(--SP, uint8_t(*r16 & 0xFF));
+}
+
+void CPU::PUSH(uint8_t *ru, uint8_t *rl) {       // PUSH r16
+  this->memory.write(--SP, *ru);
+  this->memory.write(--SP, *rl);
 }
 
 /* Miscellaneous Instructions */
