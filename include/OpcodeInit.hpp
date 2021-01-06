@@ -597,6 +597,56 @@ void CPU::initOpcodes(CPU* cpu) {
   });
 
   // B0 - BF
+  cpu->oMap[0xB0] = new Opcode(0xB0, "OR A, B", 1, 1, [&]() {
+    cpu->OR(&(cpu->reg.B));
+  });
+  cpu->oMap[0xB1] = new Opcode(0xB1, "OR A, C", 1, 1, [&]() {
+    cpu->OR(&(cpu->reg.C));
+  });
+  cpu->oMap[0xB2] = new Opcode(0xB2, "OR A, D", 1, 1, [&]() {
+    cpu->OR(&(cpu->reg.D));
+  });
+  cpu->oMap[0xB3] = new Opcode(0xB3, "OR A, E", 1, 1, [&]() {
+    cpu->OR(&(cpu->reg.E));
+  });
+  cpu->oMap[0xB4] = new Opcode(0xB4, "OR A, H", 1, 1, [&]() {
+    cpu->OR(&(cpu->reg.H));
+  });
+  cpu->oMap[0xB5] = new Opcode(0xB5, "OR A, L", 1, 1, [&]() {
+    cpu->OR(&(cpu->reg.L));
+  });
+  cpu->oMap[0xB6] = new Opcode(0xB6, "OR A, (HL)", 2, 1, [&]() {
+    uint16_t a16 = (cpu->reg.H << 8) | cpu->reg.L;
+    cpu->OR(a16);
+  });
+  cpu->oMap[0xB7] = new Opcode(0xB7, "OR A, A", 1, 1, [&]() {
+    cpu->OR(&(cpu->reg.A));
+  });
+  cpu->oMap[0xB8] = new Opcode(0xB8, "CP A, B", 1, 1, [&]() {
+    cpu->CP(&(cpu->reg.B));
+  });
+  cpu->oMap[0xB9] = new Opcode(0xB9, "CP A, C", 1, 2, [&]() {
+    cpu->CP(&(cpu->reg.C));
+  });
+  cpu->oMap[0xBA] = new Opcode(0xBA, "CP A, D", 1, 1, [&]() {
+    cpu->CP(&(cpu->reg.D));
+  });
+  cpu->oMap[0xBB] = new Opcode(0xBB, "CP A, E", 1, 1, [&]() {
+    cpu->CP(&(cpu->reg.E));
+  });
+  cpu->oMap[0xBC] = new Opcode(0xBC, "CP A, H", 1, 1, [&]() {
+    cpu->CP(&(cpu->reg.H));
+  });
+  cpu->oMap[0xBD] = new Opcode(0xBD, "CP A, L", 1, 1, [&]() {
+    cpu->CP(&(cpu->reg.L));
+  });
+  cpu->oMap[0xBE] = new Opcode(0xBE, "CP A, (HL)", 2, 1, [&]() {
+    uint16_t a16 = (cpu->reg.H << 8) | cpu->reg.L;
+    cpu->CP(a16);
+  });
+  cpu->oMap[0xBF] = new Opcode(0xBF, "CP A, A", 1, 2, [&]() {
+    cpu->CP(&(cpu->reg.A));
+  });
 
   // C0 - CF
   cpu->oMap[0xC0] = new Opcode(0xC0, "RET NZ", 2, 1, [&]() {
@@ -654,6 +704,51 @@ void CPU::initOpcodes(CPU* cpu) {
   });
 
   // D0 - DF
+  cpu->oMap[0xD0] = new Opcode(0xD0, "RET NC", 2, 1, [&]() {
+    cpu->RET(ConditionCode::NC);
+  });
+  cpu->oMap[0xD1] = new Opcode(0xD1, "POP DE", 3, 1, [&]() {
+    cpu->POP(&(cpu->reg.D), &(cpu->reg.E));
+  });
+  cpu->oMap[0xD2] = new Opcode(0xD2, "JP NC, u16", 3, 3, [&]() {
+    uint16_t u16 = (cpu->memory.read(cpu->PC + 2) << 8) | cpu->memory.read(cpu->PC + 1);
+    cpu->JP(ConditionCode::NC, u16);
+  });
+  cpu->oMap[0xD4] = new Opcode(0xD4, "CALL NC, u16", 3, 3, [&]() {
+    uint16_t u16 = (cpu->memory.read(cpu->PC + 2) << 8) | cpu->memory.read(cpu->PC + 1);
+    cpu->CALL(ConditionCode::NZ, u16);
+  });
+  cpu->oMap[0xD5] = new Opcode(0xD5, "PUSH DE", 4, 1, [&]() {
+    cpu->PUSH(&(cpu->reg.D), &(cpu->reg.E));
+  });
+  cpu->oMap[0xD6] = new Opcode(0xD6, "SUB A, u8", 2, 2, [&]() {
+    uint8_t u8 = cpu->memory.read(cpu->PC + 1);
+    cpu->SUB(u8);
+  });
+  cpu->oMap[0xD7] = new Opcode(0xD7, "RST 10h", 4, 1, [&]() {
+    cpu->RST(0x10);
+  });
+  cpu->oMap[0xD8] = new Opcode(0xD8, "RET C", 2, 1, [&]() {
+    cpu->RET(ConditionCode::C);
+  });
+  cpu->oMap[0xD9] = new Opcode(0xD9, "RETI", 4, 1, [&]() {
+    cpu->RETI();
+  });
+  cpu->oMap[0xDA] = new Opcode(0xDA, "JP C, u16", 3, 3, [&]() {
+    uint16_t u16 = (cpu->memory.read(cpu->PC + 2) << 8) | cpu->memory.read(cpu->PC + 1);
+    cpu->JP(ConditionCode::C, u16);
+  });
+  cpu->oMap[0xDC] = new Opcode(0xDC, "CALL C, u16", 3, 3, [&]() {
+    uint16_t u16 = (cpu->memory.read(cpu->PC + 2) << 8) | cpu->memory.read(cpu->PC + 1);
+    cpu->CALL(ConditionCode::C, u16);
+  });
+  cpu->oMap[0xDE] = new Opcode(0xDE, "SBC A, u8", 2, 2, [&]() {
+    uint8_t u8 = cpu->memory.read(cpu->PC + 1);
+    cpu->SBC(u8);
+  });
+  cpu->oMap[0xDF] = new Opcode(0xDF, "RST 18h", 4, 1, [&]() {
+    cpu->RST(0x18);
+  });
 
   // E0 - EF
   cpu->oMap[0xE0] = new Opcode(0xE0, "LD (FF00+u8), A", 3, 2, [&]() {
@@ -694,6 +789,53 @@ void CPU::initOpcodes(CPU* cpu) {
   });
   cpu->oMap[0xEF] = new Opcode(0xEF, "RST 28h", 4, 1, [&]() {
     cpu->RST(0x28);
+  });
+
+  // F0 - FF
+  cpu->oMap[0xF0] = new Opcode(0xF0, "LD A, (FF00+u8)", 3, 2, [&]() {
+    uint8_t u8 = cpu->memory.read(cpu->PC + 1);
+    cpu->LDA(0xFF00 + u8);
+  });
+  cpu->oMap[0xF1] = new Opcode(0xF1, "POP AF", 3, 1, [&]() {
+    cpu->POPAF();
+  });
+  cpu->oMap[0xF2] = new Opcode(0xF2, "LD A, (FF00+C)", 2, 1, [&]() {
+    cpu->LDHAC();
+  });
+  cpu->oMap[0xF3] = new Opcode(0xF3, "DI", 1, 1, [&]() {
+    cpu->DI();
+  });
+  cpu->oMap[0xF5] = new Opcode(0xF5, "PUSH AF", 4, 1, [&]() {
+    cpu->PUSHAF();
+  });
+  cpu->oMap[0xF6] = new Opcode(0xF6, "OR A, u8", 2, 2, [&]() {
+    uint8_t u8 = cpu->memory.read(cpu->PC + 1);
+    cpu->OR(u8);
+  });
+  cpu->oMap[0xF7] = new Opcode(0xF7, "RST 30h", 4, 1, [&]() {
+    cpu->RST(0x30);
+  });
+  cpu->oMap[0xF8] = new Opcode(0xF8, "LD HL, SP+e8", 3, 2, [&]() {
+    int8_t e8 = cpu->memory.read(cpu->PC + 1);
+    cpu->LDHL(e8);
+  });
+  cpu->oMap[0xF9] = new Opcode(0xF9, "LD SP, HL", 2, 1, [&]() {
+    uint16_t u16 = (cpu->reg.H << 8) | cpu->reg.L;
+    cpu->LDSP(u16);
+  });
+  cpu->oMap[0xFA] = new Opcode(0xFA, "LD A, (u16)", 4, 3, [&]() {
+    uint16_t a16 = (cpu->memory.read(cpu->PC + 2) << 8) | cpu->memory.read(cpu->PC + 1);
+    cpu->LDHA(a16);
+  });
+  cpu->oMap[0xFB] = new Opcode(0xFB, "EI", 1, 1, [&]() {
+    cpu->EI();
+  });
+  cpu->oMap[0xFE] = new Opcode(0xFE, "CP A, u8", 2, 2, [&]() {
+    uint8_t u8 = cpu->memory.read(cpu->PC + 1);
+    cpu->CP(u8);
+  });
+  cpu->oMap[0xFF] = new Opcode(0xFF, "RST 38h", 4, 1, [&]() {
+    cpu->RST(0x38);
   });
 }
 
