@@ -698,4 +698,440 @@ void CPU::initOpcodes(CPU* cpu) {
 }
 
 // TODO:
-void CPU::initPrefixed(CPU* cpu) {}
+void CPU::initPrefixed(CPU* cpu) {
+  // 00 - 0F
+  cpu->pMap[0x00] = new Opcode(0x00, "RLC B", 2, 2, [&]() {
+    cpu->RLC(&(cpu->reg.B));
+  });
+  cpu->pMap[0x01] = new Opcode(0x01, "RLC C", 2, 2, [&]() {
+    cpu->RLC(&(cpu->reg.C));
+  });
+  cpu->pMap[0x02] = new Opcode(0x02, "RLC D", 2, 2, [&]() {
+    cpu->RLC(&(cpu->reg.D));
+  });
+  cpu->pMap[0x03] = new Opcode(0x03, "RLC E", 2, 2, [&]() {
+    cpu->RLC(&(cpu->reg.E));
+  });
+  cpu->pMap[0x04] = new Opcode(0x04, "RLC H", 2, 2, [&]() {
+    cpu->RLC(&(cpu->reg.H));
+  });
+  cpu->pMap[0x05] = new Opcode(0x05, "RLC L", 2, 2, [&]() {
+    cpu->RLC(&(cpu->reg.L));
+  });
+  cpu->pMap[0x06] = new Opcode(0x06, "RLC (HL)", 4, 2, [&]() {
+    uint16_t a16 = (cpu->reg.H << 8) | cpu->reg.L;
+    cpu->RLC(a16);
+  });
+  cpu->pMap[0x07] = new Opcode(0x07, "RLC A", 2, 2, [&]() {
+    cpu->RLC(&(cpu->reg.A));
+  });
+  cpu->pMap[0x08] = new Opcode(0x08, "RRC B", 2, 2, [&]() {
+    cpu->RRC(&(cpu->reg.B));
+  });
+  cpu->pMap[0x09] = new Opcode(0x09, "RRC C", 2, 2, [&]() {
+    cpu->RRC(&(cpu->reg.C));
+  });
+  cpu->pMap[0x0A] = new Opcode(0x0A, "RRC D", 2, 2, [&]() {
+    cpu->RRC(&(cpu->reg.D));
+  });
+  cpu->pMap[0x0B] = new Opcode(0x0B, "RRC E", 2, 2, [&]() {
+    cpu->RRC(&(cpu->reg.E));
+  });
+  cpu->pMap[0x0C] = new Opcode(0x0C, "RRC H", 2, 2, [&]() {
+    cpu->RRC(&(cpu->reg.H));
+  });
+  cpu->pMap[0x0D] = new Opcode(0x0D, "RRC L", 2, 2, [&]() {
+    cpu->RRC(&(cpu->reg.L));
+  });
+  cpu->pMap[0x0E] = new Opcode(0x0E, "RRC (HL)", 4, 2, [&]() {
+    uint16_t a16 = (cpu->reg.H << 8) | cpu->reg.L;
+    cpu->RRC(a16);
+  });
+  cpu->pMap[0x0F] = new Opcode(0x0F, "RRC A", 2, 2, [&]() {
+    cpu->RRC(&(cpu->reg.A));
+  });
+
+  // 10 - 1F
+  
+  // 20 - 2F
+  cpu->pMap[0x20] = new Opcode(0x20, "SLA B", 2, 2, [&]() {
+    cpu->SLA(&(cpu->reg.B));
+  });
+  cpu->pMap[0x21] = new Opcode(0x21, "SLA C", 2, 2, [&]() {
+    cpu->SLA(&(cpu->reg.C));
+  });
+  cpu->pMap[0x22] = new Opcode(0x22, "SLA D", 2, 2, [&]() {
+    cpu->SLA(&(cpu->reg.D));
+  });
+  cpu->pMap[0x23] = new Opcode(0x23, "SLA E", 2, 2, [&]() {
+    cpu->SLA(&(cpu->reg.E));
+  });
+  cpu->pMap[0x24] = new Opcode(0x24, "SLA H", 2, 2, [&]() {
+    cpu->SLA(&(cpu->reg.H));
+  });
+  cpu->pMap[0x25] = new Opcode(0x25, "SLA L", 2, 2, [&]() {
+    cpu->SLA(&(cpu->reg.L));
+  });
+  cpu->pMap[0x26] = new Opcode(0x26, "SLA (HL)", 4, 2, [&]() {
+    uint16_t a16 = (cpu->reg.H << 8) | cpu->reg.L;
+    cpu->SLA(a16);
+  });
+  cpu->pMap[0x27] = new Opcode(0x27, "SLA A", 2, 2, [&]() {
+    cpu->SLA(&(cpu->reg.A));
+  });
+  cpu->pMap[0x28] = new Opcode(0x28, "SRA B", 2, 2, [&]() {
+    cpu->SRA(&(cpu->reg.B));
+  });
+  cpu->pMap[0x29] = new Opcode(0x29, "SRA C", 2, 2, [&]() {
+    cpu->SRA(&(cpu->reg.C));
+  });
+  cpu->pMap[0x2A] = new Opcode(0x2A, "SRA D", 2, 2, [&]() {
+    cpu->SRA(&(cpu->reg.D));
+  });
+  cpu->pMap[0x2B] = new Opcode(0x2B, "SRA E", 2, 2, [&]() {
+    cpu->SRA(&(cpu->reg.E));
+  });
+  cpu->pMap[0x2C] = new Opcode(0x2C, "SRA H", 2, 2, [&]() {
+    cpu->SRA(&(cpu->reg.H));
+  });
+  cpu->pMap[0x2D] = new Opcode(0x2D, "SRA L", 2, 2, [&]() {
+    cpu->SRA(&(cpu->reg.L));
+  });
+  cpu->pMap[0x2E] = new Opcode(0x2E, "SRA (HL)", 4, 2, [&]() {
+    uint16_t a16 = (cpu->reg.H << 8) | cpu->reg.L;
+    cpu->SRA(a16);
+  });
+  cpu->pMap[0x2F] = new Opcode(0x2F, "SRA A", 2, 2, [&]() {
+    cpu->SRA(&(cpu->reg.A));
+  });
+
+  // 30 - 3F
+
+  // 40 - 4F
+  cpu->pMap[0x40] = new Opcode(0x40, "BIT 0, B", 2, 2, [&]() {
+    cpu->BIT(0, &(cpu->reg.B));
+  });
+  cpu->pMap[0x41] = new Opcode(0x41, "BIT 0, C", 2, 2, [&]() {
+    cpu->BIT(0, &(cpu->reg.C));
+  });
+  cpu->pMap[0x42] = new Opcode(0x42, "BIT 0, D", 2, 2, [&]() {
+    cpu->BIT(0, &(cpu->reg.D));
+  });
+  cpu->pMap[0x43] = new Opcode(0x43, "BIT 0, E", 2, 2, [&]() {
+    cpu->BIT(0, &(cpu->reg.E));
+  });
+  cpu->pMap[0x44] = new Opcode(0x44, "BIT 0, H", 2, 2, [&]() {
+    cpu->BIT(0, &(cpu->reg.H));
+  });
+  cpu->pMap[0x45] = new Opcode(0x45, "BIT 0, L", 2, 2, [&]() {
+    cpu->BIT(0, &(cpu->reg.L));
+  });
+  cpu->pMap[0x46] = new Opcode(0x46, "BIT 0, (HL)", 3, 2, [&]() {
+    uint16_t a16 = (cpu->reg.H << 8) | cpu->reg.L;
+    cpu->BIT(0, a16);
+  });
+  cpu->pMap[0x47] = new Opcode(0x47, "BIT 0, A", 2, 2, [&]() {
+    cpu->BIT(0, &(cpu->reg.A));
+  });
+  cpu->pMap[0x48] = new Opcode(0x48, "BIT 1, B", 2, 2, [&]() {
+    cpu->BIT(1, &(cpu->reg.B));
+  });
+  cpu->pMap[0x49] = new Opcode(0x49, "BIT 1, C", 2, 2, [&]() {
+    cpu->BIT(1, &(cpu->reg.C));
+  });
+  cpu->pMap[0x4A] = new Opcode(0x4A, "BIT 1, D", 2, 2, [&]() {
+    cpu->BIT(1, &(cpu->reg.D));
+  });
+  cpu->pMap[0x4B] = new Opcode(0x4B, "BIT 1, E", 2, 2, [&]() {
+    cpu->BIT(1, &(cpu->reg.E));
+  });
+  cpu->pMap[0x4C] = new Opcode(0x4C, "BIT 1, H", 2, 2, [&]() {
+    cpu->BIT(1, &(cpu->reg.H));
+  });
+  cpu->pMap[0x4D] = new Opcode(0x4D, "BIT 1, L", 2, 2, [&]() {
+    cpu->BIT(1, &(cpu->reg.L));
+  });
+  cpu->pMap[0x4E] = new Opcode(0x4E, "BIT 1, (HL)", 3, 2, [&]() {
+    uint16_t a16 = (cpu->reg.H << 8) | cpu->reg.L;
+    cpu->BIT(1, a16);
+  });
+  cpu->pMap[0x4F] = new Opcode(0x4F, "BIT 1, A", 2, 2, [&]() {
+    cpu->BIT(1, &(cpu->reg.A));
+  });
+
+  // 50 - 5F
+
+  
+  // 60 - 6F
+  cpu->pMap[0x60] = new Opcode(0x60, "BIT 4, B", 2, 2, [&]() {
+    cpu->BIT(4, &(cpu->reg.B));
+  });
+  cpu->pMap[0x61] = new Opcode(0x61, "BIT 4, C", 2, 2, [&]() {
+    cpu->BIT(4, &(cpu->reg.C));
+  });
+  cpu->pMap[0x62] = new Opcode(0x62, "BIT 4, D", 2, 2, [&]() {
+    cpu->BIT(4, &(cpu->reg.D));
+  });
+  cpu->pMap[0x63] = new Opcode(0x63, "BIT 4, E", 2, 2, [&]() {
+    cpu->BIT(4, &(cpu->reg.E));
+  });
+  cpu->pMap[0x64] = new Opcode(0x64, "BIT 4, H", 2, 2, [&]() {
+    cpu->BIT(4, &(cpu->reg.H));
+  });
+  cpu->pMap[0x65] = new Opcode(0x65, "BIT 4, L", 2, 2, [&]() {
+    cpu->BIT(4, &(cpu->reg.L));
+  });
+  cpu->pMap[0x66] = new Opcode(0x66, "BIT 4, (HL)", 3, 2, [&]() {
+    uint16_t a16 = (cpu->reg.H << 8) | cpu->reg.L;
+    cpu->BIT(4, a16);
+  });
+  cpu->pMap[0x67] = new Opcode(0x67, "BIT 4, A", 2, 2, [&]() {
+    cpu->BIT(4, &(cpu->reg.A));
+  });
+  cpu->pMap[0x68] = new Opcode(0x68, "BIT 5, B", 2, 2, [&]() {
+    cpu->BIT(5, &(cpu->reg.B));
+  });
+  cpu->pMap[0x69] = new Opcode(0x69, "BIT 5, C", 2, 2, [&]() {
+    cpu->BIT(5, &(cpu->reg.C));
+  });
+  cpu->pMap[0x6A] = new Opcode(0x6A, "BIT 5, D", 2, 2, [&]() {
+    cpu->BIT(5, &(cpu->reg.D));
+  });
+  cpu->pMap[0x6B] = new Opcode(0x6B, "BIT 5, E", 2, 2, [&]() {
+    cpu->BIT(5, &(cpu->reg.E));
+  });
+  cpu->pMap[0x6C] = new Opcode(0x6C, "BIT 5, H", 2, 2, [&]() {
+    cpu->BIT(5, &(cpu->reg.H));
+  });
+  cpu->pMap[0x6D] = new Opcode(0x6D, "BIT 5, L", 2, 2, [&]() {
+    cpu->BIT(5, &(cpu->reg.L));
+  });
+  cpu->pMap[0x6E] = new Opcode(0x6E, "BIT 5, (HL)", 3, 2, [&]() {
+    uint16_t a16 = (cpu->reg.H << 8) | cpu->reg.L;
+    cpu->BIT(5, a16);
+  });
+  cpu->pMap[0x6F] = new Opcode(0x6F, "BIT 5, A", 2, 2, [&]() {
+    cpu->BIT(5, &(cpu->reg.A));
+  });
+
+  // 70 - 7F
+  
+  // 80 - 8F
+  cpu->pMap[0x80] = new Opcode(0x80, "RES 0, B", 2, 2, [&]() {
+    cpu->RES(0, &(cpu->reg.B));
+  });
+  cpu->pMap[0x81] = new Opcode(0x81, "RES 0, C", 2, 2, [&]() {
+    cpu->RES(0, &(cpu->reg.C));
+  });
+  cpu->pMap[0x82] = new Opcode(0x82, "RES 0, D", 2, 2, [&]() {
+    cpu->RES(0, &(cpu->reg.D));
+  });
+  cpu->pMap[0x83] = new Opcode(0x83, "RES 0, E", 2, 2, [&]() {
+    cpu->RES(0, &(cpu->reg.E));
+  });
+  cpu->pMap[0x84] = new Opcode(0x84, "RES 0, H", 2, 2, [&]() {
+    cpu->RES(0, &(cpu->reg.H));
+  });
+  cpu->pMap[0x85] = new Opcode(0x85, "RES 0, L", 2, 2, [&]() {
+    cpu->RES(0, &(cpu->reg.L));
+  });
+  cpu->pMap[0x86] = new Opcode(0x86, "RES 0, (HL)", 4, 2, [&]() {
+    uint16_t a16 = (cpu->reg.H << 8) | cpu->reg.L;
+    cpu->RES(0, a16);
+  });
+  cpu->pMap[0x87] = new Opcode(0x87, "RES 0, A", 2, 2, [&]() {
+    cpu->RES(0, &(cpu->reg.A));
+  });
+  cpu->pMap[0x88] = new Opcode(0x88, "RES 1, B", 2, 2, [&]() {
+    cpu->RES(1, &(cpu->reg.B));
+  });
+  cpu->pMap[0x89] = new Opcode(0x89, "RES 1, C", 2, 2, [&]() {
+    cpu->RES(1, &(cpu->reg.C));
+  });
+  cpu->pMap[0x8A] = new Opcode(0x8A, "RES 1, D", 2, 2, [&]() {
+    cpu->RES(1, &(cpu->reg.D));
+  });
+  cpu->pMap[0x8B] = new Opcode(0x8B, "RES 1, E", 2, 2, [&]() {
+    cpu->RES(1, &(cpu->reg.E));
+  });
+  cpu->pMap[0x8C] = new Opcode(0x8C, "RES 1, H", 2, 2, [&]() {
+    cpu->RES(1, &(cpu->reg.H));
+  });
+  cpu->pMap[0x8D] = new Opcode(0x8D, "RES 1, L", 2, 2, [&]() {
+    cpu->RES(1, &(cpu->reg.L));
+  });
+  cpu->pMap[0x8E] = new Opcode(0x8E, "RES 1, (HL)", 4, 2, [&]() {
+    uint16_t a16 = (cpu->reg.H << 8) | cpu->reg.L;
+    cpu->RES(1, a16);
+  });
+  cpu->pMap[0x8F] = new Opcode(0x8F, "RES 1, A", 2, 2, [&]() {
+    cpu->RES(1, &(cpu->reg.A));
+  });
+
+  // 90 - 9F
+
+  // A0 - AF
+  cpu->pMap[0xA0] = new Opcode(0xA0, "RES 4, B", 2, 2, [&]() {
+    cpu->RES(4, &(cpu->reg.B));
+  });
+  cpu->pMap[0xA1] = new Opcode(0xA1, "RES 4, C", 2, 2, [&]() {
+    cpu->RES(4, &(cpu->reg.C));
+  });
+  cpu->pMap[0xA2] = new Opcode(0xA2, "RES 4, D", 2, 2, [&]() {
+    cpu->RES(4, &(cpu->reg.D));
+  });
+  cpu->pMap[0xA3] = new Opcode(0xA3, "RES 4, E", 2, 2, [&]() {
+    cpu->RES(4, &(cpu->reg.E));
+  });
+  cpu->pMap[0xA4] = new Opcode(0xA4, "RES 4, H", 2, 2, [&]() {
+    cpu->RES(4, &(cpu->reg.H));
+  });
+  cpu->pMap[0xA5] = new Opcode(0xA5, "RES 4, L", 2, 2, [&]() {
+    cpu->RES(4, &(cpu->reg.L));
+  });
+  cpu->pMap[0xA6] = new Opcode(0xA6, "RES 4, (HL)", 4, 2, [&]() {
+    uint16_t a16 = (cpu->reg.H << 8) | cpu->reg.L;
+    cpu->RES(4, a16);
+  });
+  cpu->pMap[0xA7] = new Opcode(0xA7, "RES 4, A", 2, 2, [&]() {
+    cpu->RES(4, &(cpu->reg.A));
+  });
+  cpu->pMap[0xA8] = new Opcode(0xA8, "RES 5, B", 2, 2, [&]() {
+    cpu->RES(5, &(cpu->reg.B));
+  });
+  cpu->pMap[0xA9] = new Opcode(0xA9, "RES 5, C", 2, 2, [&]() {
+    cpu->RES(5, &(cpu->reg.C));
+  });
+  cpu->pMap[0xAA] = new Opcode(0xAA, "RES 5, D", 2, 2, [&]() {
+    cpu->RES(5, &(cpu->reg.D));
+  });
+  cpu->pMap[0xAB] = new Opcode(0xAB, "RES 5, E", 2, 2, [&]() {
+    cpu->RES(5, &(cpu->reg.E));
+  });
+  cpu->pMap[0xAC] = new Opcode(0xAC, "RES 5, H", 2, 2, [&]() {
+    cpu->RES(5, &(cpu->reg.H));
+  });
+  cpu->pMap[0xAD] = new Opcode(0xAD, "RES 5, L", 2, 2, [&]() {
+    cpu->RES(5, &(cpu->reg.L));
+  });
+  cpu->pMap[0xAE] = new Opcode(0xAE, "RES 5, (HL)", 4, 2, [&]() {
+    uint16_t a16 = (cpu->reg.H << 8) | cpu->reg.L;
+    cpu->RES(5, a16);
+  });
+  cpu->pMap[0xAF] = new Opcode(0xAF, "RES 5, A", 2, 2, [&]() {
+    cpu->RES(5, &(cpu->reg.A));
+  });
+
+  // B0 - BF
+
+  // C0 - CF
+  cpu->pMap[0xC0] = new Opcode(0xC0, "SET 0, B", 2, 2, [&]() {
+    cpu->SET(0, &(cpu->reg.B));
+  });
+  cpu->pMap[0xC1] = new Opcode(0xC1, "SET 0, C", 2, 2, [&]() {
+    cpu->SET(0, &(cpu->reg.C));
+  });
+  cpu->pMap[0xC2] = new Opcode(0xC2, "SET 0, D", 2, 2, [&]() {
+    cpu->SET(0, &(cpu->reg.D));
+  });
+  cpu->pMap[0xC3] = new Opcode(0xC3, "SET 0, E", 2, 2, [&]() {
+    cpu->SET(0, &(cpu->reg.E));
+  });
+  cpu->pMap[0xC4] = new Opcode(0xC4, "SET 0, H", 2, 2, [&]() {
+    cpu->SET(0, &(cpu->reg.H));
+  });
+  cpu->pMap[0xC5] = new Opcode(0xC5, "SET 0, L", 2, 2, [&]() {
+    cpu->SET(0, &(cpu->reg.L));
+  });
+  cpu->pMap[0xC6] = new Opcode(0xC6, "SET 0, (HL)", 4, 2, [&]() {
+    uint16_t a16 = (cpu->reg.H << 8) | cpu->reg.L;
+    cpu->SET(0, a16);
+  });
+  cpu->pMap[0xC7] = new Opcode(0xC7, "SET 0, A", 2, 2, [&]() {
+    cpu->SET(0, &(cpu->reg.A));
+  });
+  cpu->pMap[0xC8] = new Opcode(0xC8, "SET 1, B", 2, 2, [&]() {
+    cpu->SET(1, &(cpu->reg.B));
+  });
+  cpu->pMap[0xC9] = new Opcode(0xC9, "SET 1, C", 2, 2, [&]() {
+    cpu->SET(1, &(cpu->reg.C));
+  });
+  cpu->pMap[0xCA] = new Opcode(0xCA, "SET 1, D", 2, 2, [&]() {
+    cpu->SET(1, &(cpu->reg.D));
+  });
+  cpu->pMap[0xCB] = new Opcode(0xCB, "SET 1, E", 2, 2, [&]() {
+    cpu->SET(1, &(cpu->reg.E));
+  });
+  cpu->pMap[0xCC] = new Opcode(0xCC, "SET 1, H", 2, 2, [&]() {
+    cpu->SET(1, &(cpu->reg.H));
+  });
+  cpu->pMap[0xCD] = new Opcode(0xCD, "SET 1, L", 2, 2, [&]() {
+    cpu->SET(1, &(cpu->reg.L));
+  });
+  cpu->pMap[0xCE] = new Opcode(0xCE, "SET 1, (HL)", 4, 2, [&]() {
+    uint16_t a16 = (cpu->reg.H << 8) | cpu->reg.L;
+    cpu->SET(1, a16);
+  });
+  cpu->pMap[0xCF] = new Opcode(0xCF, "SET 1, A", 2, 2, [&]() {
+    cpu->SET(1, &(cpu->reg.A));
+  });
+
+  // D0 - DF
+
+  // E0 - EF
+  cpu->pMap[0xE0] = new Opcode(0xE0, "SET 4, B", 2, 2, [&]() {
+    cpu->SET(4, &(cpu->reg.B));
+  });
+  cpu->pMap[0xE1] = new Opcode(0xE1, "SET 4, C", 2, 2, [&]() {
+    cpu->SET(4, &(cpu->reg.C));
+  });
+  cpu->pMap[0xE2] = new Opcode(0xE2, "SET 4, D", 2, 2, [&]() {
+    cpu->SET(4, &(cpu->reg.D));
+  });
+  cpu->pMap[0xE3] = new Opcode(0xE3, "SET 4, E", 2, 2, [&]() {
+    cpu->SET(4, &(cpu->reg.E));
+  });
+  cpu->pMap[0xE4] = new Opcode(0xE4, "SET 4, H", 2, 2, [&]() {
+    cpu->SET(4, &(cpu->reg.H));
+  });
+  cpu->pMap[0xE5] = new Opcode(0xE5, "SET 4, L", 2, 2, [&]() {
+    cpu->SET(4, &(cpu->reg.L));
+  });
+  cpu->pMap[0xE6] = new Opcode(0xE6, "SET 4, (HL)", 4, 2, [&]() {
+    uint16_t a16 = (cpu->reg.H << 8) | cpu->reg.L;
+    cpu->SET(4, a16);
+  });
+  cpu->pMap[0xE7] = new Opcode(0xE7, "SET 4, A", 2, 2, [&]() {
+    cpu->SET(4, &(cpu->reg.A));
+  });
+  cpu->pMap[0xE8] = new Opcode(0xE8, "SET 5, B", 2, 2, [&]() {
+    cpu->SET(5, &(cpu->reg.B));
+  });
+  cpu->pMap[0xE9] = new Opcode(0xE9, "SET 5, C", 2, 2, [&]() {
+    cpu->SET(5, &(cpu->reg.C));
+  });
+  cpu->pMap[0xEA] = new Opcode(0xEA, "SET 5, D", 2, 2, [&]() {
+    cpu->SET(5, &(cpu->reg.D));
+  });
+  cpu->pMap[0xEB] = new Opcode(0xEB, "SET 5, E", 2, 2, [&]() {
+    cpu->SET(5, &(cpu->reg.E));
+  });
+  cpu->pMap[0xEC] = new Opcode(0xEC, "SET 5, H", 2, 2, [&]() {
+    cpu->SET(5, &(cpu->reg.H));
+  });
+  cpu->pMap[0xED] = new Opcode(0xED, "SET 5, L", 2, 2, [&]() {
+    cpu->SET(5, &(cpu->reg.L));
+  });
+  cpu->pMap[0xEE] = new Opcode(0xEE, "SET 5, (HL)", 4, 2, [&]() {
+    uint16_t a16 = (cpu->reg.H << 8) | cpu->reg.L;
+    cpu->SET(5, a16);
+  });
+  cpu->pMap[0xEF] = new Opcode(0xEF, "SET 5, A", 2, 2, [&]() {
+    cpu->SET(5, &(cpu->reg.A));
+  });
+
+  
+  // F0 - FF
+  
+  
+}
