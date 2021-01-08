@@ -4,7 +4,6 @@
 #include "./CPU.h"
 #include "./Opcode.h"
 
-// TODO:
 void CPU::initOpcodes(CPU* cpu) {
   // 00 - 0F
   cpu->oMap[0x00] = new Opcode(0x00, "NOP", 1, 1, [&]() {});
@@ -22,7 +21,7 @@ void CPU::initOpcodes(CPU* cpu) {
   cpu->oMap[0x04] = new Opcode(0x04, "INC B", 1, 1, [&]() {
     cpu->INC(&(cpu->reg.B));
   });
-  cpu->oMap[0x05] = new Opcode (0x05, "DEC B", 1, 1, [&]() {
+  cpu->oMap[0x05] = new Opcode(0x05, "DEC B", 1, 1, [&]() {
     cpu->DEC(&(cpu->reg.B));
   });
   cpu->oMap[0x06] = new Opcode(0x06, "LD, B, u8", 2, 2, [&]() {
@@ -72,11 +71,11 @@ void CPU::initOpcodes(CPU* cpu) {
   cpu->oMap[0x13] = new Opcode(0x13, "INC DE", 2, 1, [&]() {
     cpu->INC(&(cpu->reg.D), &(cpu->reg.E));
   });
-  cpu->oMap[0x14] = new Opcode(0x14, "INC C", 1, 1, [&]() {
-    cpu->INC(&(cpu->reg.C));
+  cpu->oMap[0x14] = new Opcode(0x14, "INC D", 1, 1, [&]() {
+    cpu->INC(&(cpu->reg.D));
   });
-  cpu->oMap[0x15] = new Opcode(0x15, "DEC C", 1, 1, [&]() {
-    cpu->DEC(&(cpu->reg.C));
+  cpu->oMap[0x15] = new Opcode(0x15, "DEC D", 1, 1, [&]() {
+    cpu->DEC(&(cpu->reg.D));
   });
   cpu->oMap[0x16] = new Opcode(0x16, "LD D, u8", 2, 2, [&]() {
     cpu->LD(&(cpu->reg.D), cpu->memory.read(cpu->PC + 1));
@@ -117,7 +116,7 @@ void CPU::initOpcodes(CPU* cpu) {
     int8_t e8 = cpu->memory.read(cpu->PC + 1);
     cpu->JR(ConditionCode::NZ, e8);
   });
-  cpu->oMap[0x21] = new Opcode(0x21, "LD HL,u16", 3, 3, [&]() {
+  cpu->oMap[0x21] = new Opcode(0x21, "LD HL, u16", 3, 3, [&]() {
     uint16_t u16 = (cpu->memory.read(cpu->PC + 2) << 8) | cpu->memory.read(cpu->PC + 1);
     cpu->LD(&(cpu->reg.H), &(cpu->reg.L), u16);
   });
@@ -169,7 +168,7 @@ void CPU::initOpcodes(CPU* cpu) {
   });
 
   // 30 - 3F
-  cpu->oMap[0x30] = new Opcode(0x30, "JR NC, e8", 3, 2, [&]() {
+  cpu->oMap[0x30] = new Opcode(0x30, "JR NC, e8", 2, 2, [&]() {
     int8_t e8 = cpu->memory.read(cpu->PC + 1);
     cpu->JR(ConditionCode::NC, e8);
   });
@@ -410,7 +409,7 @@ void CPU::initOpcodes(CPU* cpu) {
   cpu->oMap[0x76] = new Opcode(0x76, "HALT", 1, 1, [&]() {
     cpu->HALT();
   });
-  cpu->oMap[0x77] = new Opcode(0x77, "LD (HL), A", 1, 2, [&]() {
+  cpu->oMap[0x77] = new Opcode(0x77, "LD (HL), A", 2, 1, [&]() {
     uint16_t a16 = (cpu->reg.H << 8) | cpu->reg.L;
     cpu->LD(a16, &(cpu->reg.A));
   });
@@ -625,7 +624,7 @@ void CPU::initOpcodes(CPU* cpu) {
   cpu->oMap[0xB8] = new Opcode(0xB8, "CP A, B", 1, 1, [&]() {
     cpu->CP(&(cpu->reg.B));
   });
-  cpu->oMap[0xB9] = new Opcode(0xB9, "CP A, C", 1, 2, [&]() {
+  cpu->oMap[0xB9] = new Opcode(0xB9, "CP A, C", 1, 1, [&]() {
     cpu->CP(&(cpu->reg.C));
   });
   cpu->oMap[0xBA] = new Opcode(0xBA, "CP A, D", 1, 1, [&]() {
@@ -644,7 +643,7 @@ void CPU::initOpcodes(CPU* cpu) {
     uint16_t a16 = (cpu->reg.H << 8) | cpu->reg.L;
     cpu->CP(a16);
   });
-  cpu->oMap[0xBF] = new Opcode(0xBF, "CP A, A", 1, 2, [&]() {
+  cpu->oMap[0xBF] = new Opcode(0xBF, "CP A, A", 1, 1, [&]() {
     cpu->CP(&(cpu->reg.A));
   });
 
@@ -695,7 +694,7 @@ void CPU::initOpcodes(CPU* cpu) {
     uint16_t u16 = (cpu->memory.read(cpu->PC + 2) << 8) | cpu->memory.read(cpu->PC + 1);
     cpu->CALL(u16);
   });
-  cpu->oMap[0xCE] = new Opcode(0xCE, "ADC A, u8", 2, 3, [&]() {
+  cpu->oMap[0xCE] = new Opcode(0xCE, "ADC A, u8", 2, 2, [&]() {
     uint8_t u8 = cpu->memory.read(cpu->PC + 1);
     cpu->ADC(u8);
   });
@@ -716,7 +715,7 @@ void CPU::initOpcodes(CPU* cpu) {
   });
   cpu->oMap[0xD4] = new Opcode(0xD4, "CALL NC, u16", 3, 3, [&]() {
     uint16_t u16 = (cpu->memory.read(cpu->PC + 2) << 8) | cpu->memory.read(cpu->PC + 1);
-    cpu->CALL(ConditionCode::NZ, u16);
+    cpu->CALL(ConditionCode::NC, u16);
   });
   cpu->oMap[0xD5] = new Opcode(0xD5, "PUSH DE", 4, 1, [&]() {
     cpu->PUSH(&(cpu->reg.D), &(cpu->reg.E));
@@ -839,7 +838,6 @@ void CPU::initOpcodes(CPU* cpu) {
   });
 }
 
-// TODO:
 void CPU::initPrefixed(CPU* cpu) {
   // 00 - 0F
   cpu->pMap[0x00] = new Opcode(0x00, "RLC B", 2, 2, [&]() {
@@ -1566,7 +1564,7 @@ void CPU::initPrefixed(CPU* cpu) {
       cpu->SET(3, a16);
   });
   cpu->pMap[0xDF] = new Opcode(0xDF, "SET 3, A", 2, 2, [&]() {
-      cpu->SET(1, &(cpu->reg.A));
+      cpu->SET(3, &(cpu->reg.A));
   });
 
   // E0 - EF
