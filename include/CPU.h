@@ -7,7 +7,7 @@
 #include "Memory.h"
 
 // Pre-defined Macros
-#define TOTAL_FRAME_CYCLES 17556
+#define TOTAL_LINE_CYCLES 114
 
 struct Register {
     uint8_t A;
@@ -22,7 +22,7 @@ struct Register {
 
 enum ConditionCode { Z, NZ, C, NC };
 
-
+class PPU;    // Forward-Declaration
 class CPU {
 protected:
     // CPU Instruction model based on RGBDS v0.4.2 documentation
@@ -177,6 +177,12 @@ protected:
     void HALT();                          // HALT
     void SCF();                           // SCF
 
+protected:
+    friend class PPU;
+    PPU *ppu;
+    int lineCycles;     // Total 114
+    int extraCycles;
+
 private:
     std::unordered_map<uint16_t, Opcode*> oMap; // Opcode Map
     std::unordered_map<uint16_t, Opcode*> pMap; // Prefix Map
@@ -186,9 +192,7 @@ private:
     uint16_t PC;
     uint16_t SP;
     Memory memory;
-    // TODO: PPU
-    int cyclesLeftInCurrentFrame;   // Total 17556
-    
+
     void handleInterrupt();
     void executeInstructions(int cycles);
 

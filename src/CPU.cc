@@ -1,5 +1,6 @@
 #include "../include/CPU.h"
 #include "../include/OpcodeInit.hpp"
+#include "../include/PPU.h"
 
 /**
  * Initialize the CPU by constructing and populating
@@ -8,12 +9,15 @@
  */
 CPU::CPU(std::string ROMPath): memory(ROMPath) {
   // Default Values
-  cyclesLeftInCurrentFrame = TOTAL_FRAME_CYCLES;
+  lineCycles = TOTAL_LINE_CYCLES;
+  extraCycles = 0;
   halted = false;
-  
+
   // Initialize the Opcode & Prefix Map
   this->initOpcodes(this);
   this->initPrefixed(this);
+
+  ppu = new PPU(this, &this->memory);
 }
 
 /**
@@ -28,6 +32,7 @@ CPU::~CPU() {
   for (auto key: this->pMap) {
     delete key.second;
   }
+  delete this->ppu;
 };
 
 /**
@@ -89,8 +94,53 @@ void CPU::checkCarry(uint8_t prev, uint16_t after) { // Overflow from 7th Bit
 }
 
 
+/**
+ * Main Run Function for the CPU
+ *  - Executes Instructions
+ *  - Communications between PPU & Memory
+ */
+void CPU::nextFrame() {
+  lineCycles = TOTAL_LINE_CYCLES;
+
+  // Prompt PPU to Generate Scanline
+  for (int LY = 0; LY <= 153; LY++) {
+    ppu->generateScanline(LY);
+  }
+}
+
+/**
+ * Handle CPU Instructions from PC! 🤠🤠🤠🤠
+ * @param cycles Cycles the CPU is allowed to Run for
+ */
+void CPU::executeInstructions(int cycles) {
+  int cyclesLeft = cycles;
+  handleInterrupt();
+
+  while (cyclesLeft > 0) {
+    // Get Opcode Value
+    uint8_t currentOpcode = this->memory.read(this->PC);
+
+    // Condition between Opcode & PREFIX Table
+    Opcode *opcodeObj;
+    if (currentOpcode!= 0xCB) {
+      opcodeObj = oMap[currentOpcode];
+    } else {
+      opcodeObj = pMap[currentOpcode + 1];
+    }
+
+    // Exec Opcode
+    opcodeObj->exec();
+
+    // Decrement CyclesLeft & Additional Cycles taken by Opcode
+    cyclesLeft -= this->extraCycles + opcodeObj->machineCycles;
+    this->extraCycles = 0;
+
+    // Set new PC
+    this->PC += opcodeObj->length;
+  }
+}
+
 
 // TODO:
 void CPU::handleInterrupt() {}
-void CPU::nextFrame() {}
-void CPU::executeInstructions(int cycles) {}
+
