@@ -1,23 +1,30 @@
 ## TODO List
 
 ### Initial Structure
-- [ ] SDL Window
-- [ ] makefile (Linux + Windows)
+- [x] SDL Window
+- [ ] makefile 
+  - [x] Linux
+  - [ ] Windows
 
 ### CPU
-- [ ] Implement Memory
-- [ ] Implement Registers
-- [ ] Implement Flag Register
+- [x] Implement Registers
+- [x] Implement Flag Register
 - [ ] Implement Timers
-
-### Opcode
-- [ ] Implement Opcode Class
-
-### CPU Last Polishing
 - [ ] Implement Interrupts
 
-### PPU (LATER!!!)
-- [ ] LCD Modes
+### Memory
+- [x] Use Byte Array for Memory Map
+- [ ] Read/Write Methods
+- [x] Populate Memory from ROM
+
+### Opcode
+- [x] Implement Opcode Class
+
+### PPU 
+- [x] LCD Modes
+
+### Testing
+- [ ] Test ROMs: Serial Link / Memory Result (Account for Result Output)
 
 ### Backlog
 - [ ] Memory Banking (MBC)

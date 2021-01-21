@@ -18,6 +18,9 @@ CPU::CPU(std::string ROMPath): memory(ROMPath) {
   this->initPrefixed(this);
 
   ppu = new PPU(this, &this->memory);
+
+  // Give memory access to LCD Mode
+  this->memory.LCDMode = &(ppu->LCDMode);
 }
 
 /**

@@ -3,11 +3,13 @@
 
 class PPU {
 protected:
+    friend class CPU;
+    uint8_t LCDMode;
 
 private:
     Memory *memory;
     CPU *cpu;
-    uint8_t LCDMode;
+
 public:
     PPU(CPU *cpu, Memory *memory);
 
