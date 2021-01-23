@@ -138,7 +138,8 @@ protected:
     void CALL(uint16_t a16);              // CALL, u16
     void CALL(ConditionCode cc, uint16_t a16);  // CALL cc, u16
 
-    void JP(uint16_t a16);                // JP HL | JP u16
+    void JP(uint16_t a16);                // JP u16
+    void JPHL(uint16_t a16);              // JP HL
     void JP(ConditionCode cc, uint16_t a16);    // JP cc, u16
 
     void JR(int8_t e8);                   // JR e8
@@ -189,9 +190,11 @@ private:
     Register reg;
     bool IME;
     bool halted;
+    bool running;
     uint16_t PC;
     uint16_t SP;
     Memory memory;
+    std::ofstream cpuExecDump;
 
     void handleInterrupt();
     void executeInstructions(int cycles);
@@ -214,4 +217,6 @@ public:
     CPU(std::string ROMPath);
     ~CPU();
     void nextFrame();               // Runs 60 Iterations / Seconds until no more free cycles pre Frame
+    void dump(std::ostream &out, bool isHeader = true, char endChar = '\n');   // Dumps Registers & CPU Dependant States
+    const bool isRunning();
 };

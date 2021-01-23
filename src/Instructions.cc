@@ -14,8 +14,7 @@ void CPU::ADC(uint8_t u8) {                 // ADC A, u8
   uint8_t result = this->reg.A + (this->reg.F & 0x10) + u8;
 
   // Set Flags
-  if (result == 0)                    // Zero Flag
-    this->setZeroFlag(true);
+  this->setZeroFlag(result == 0);     // Zero Flag
   this->setAddSubFlag(false);   // Unset N Flag
   this->checkHalfCarry(result, this->reg.A);
   this->checkCarry(result, this->reg.A);
@@ -36,8 +35,7 @@ void CPU::ADD(uint8_t u8) {                 // ADD A, u8
   uint8_t result = this->reg.A + u8;
 
   // Set Flags
-  if (result == 0)                    // Zero Flag
-    this->setZeroFlag(true);
+  this->setZeroFlag(result == 0);     // Zero Flag
   this->setAddSubFlag(false);   // Unset N Flag
   this->checkHalfCarry(result, this->reg.A);
   this->checkCarry(result, this->reg.A);
@@ -58,8 +56,7 @@ void CPU::AND(uint8_t u8) {                 // AND A, u8
   uint8_t result = this->reg.A & u8;
 
   // Set Flags
-  if (result == 0)                    // Zero Flag
-    this->setZeroFlag(true);
+  this->setZeroFlag(result == 0);     // Zero Flag
   this->setAddSubFlag(false);   // Unset N Flag
   this->setHalfCarryFlag(true); // Set H Flag
   this->setCarryFlag(false);    // Unset C Flag
@@ -80,8 +77,7 @@ void CPU::CP(uint8_t u8) {                  // CP A, u8
   uint8_t result = this->reg.A - u8;
 
   // Set Flags
-  if (result == 0)                  // Zero Flag
-    this->setZeroFlag(true);
+  this->setZeroFlag(result == 0);     // Zero Flag
   this->setAddSubFlag(true);  // Set N Flag
   this->checkHalfCarry(this->reg.A, result); // Set if borrow from bit 4
   this->checkCarry(this->reg.A, result); // Set if borrow
@@ -91,8 +87,7 @@ void CPU::DEC(uint8_t *r8) {                // DEC r8
   uint8_t result = *r8 - 1;
 
   // Set Flags
-  if (result == 0)                   // Zero Flag
-    this->setZeroFlag(true);
+  this->setZeroFlag(result == 0);   // Zero Flag
   this->setAddSubFlag(true);  // Set N Flag
   this->checkHalfCarry(*r8, result); // Set if borrow from bit 4
 
@@ -104,8 +99,7 @@ void CPU::DEC(uint16_t a16) {               // DEC [HL]
   uint8_t result = this->memory.read(a16) - 1;
 
   // Set Flags
-  if (result == 0)                  // Zero Flag
-    this->setZeroFlag(true);
+  this->setZeroFlag(result == 0);   // Zero Flag
   this->setAddSubFlag(true);  // Set N Flag
   this->checkHalfCarry(this->memory.read(a16), result); // Set if borrow from bit 4
 
@@ -116,10 +110,9 @@ void CPU::INC(uint8_t *r8) {                // INC r8
   uint8_t result = *r8 + 1;
 
   // Set Flags
-  if (result == 0)                    // Zero Flag
-    this->setZeroFlag(true);
-  this->setAddSubFlag(false);  // Unset N Flag
-  this->checkHalfCarry(*r8, result); // Set if overflow from bit 3
+  this->setZeroFlag(result == 0);   // Zero Flag
+  this->setAddSubFlag(false);       // Unset N Flag
+  this->checkHalfCarry(*r8, result);     // Set if overflow from bit 3
 
   // New r8 value
   *r8 = result;
@@ -129,8 +122,7 @@ void CPU::INC(uint16_t a16) {               // INC [HL]
   uint8_t result = this->memory.read(a16) + 1;
 
   // Set Flags
-  if (result == 0)                   // Zero Flag
-    this->setZeroFlag(true);
+  this->setZeroFlag(result == 0);   // Zero Flag
   this->setAddSubFlag(false);  // Unset N Flag
   this->checkHalfCarry(this->memory.read(a16), result); // Set if overflow from bit 3
 
@@ -150,8 +142,7 @@ void CPU::OR(uint8_t u8) {                  // OR A, u8
 
   // Set Flags
   this->reg.F = 0x00;                // Reset Flags
-  if (result == 0)                   // Zero Flag
-    this->setZeroFlag(true);
+  this->setZeroFlag(result == 0);     // Zero Flag
 
   this->reg.A = result;
 }
@@ -168,8 +159,7 @@ void CPU::SBC(uint8_t u8) {                 // SBC A, u8
   uint8_t result = this->reg.A - u8 - (this->reg.F & 0x10);
 
   // Set Flags
-  if (result == 0)                   // Zero Flag
-    this->setZeroFlag(true);
+  this->setZeroFlag(result == 0);     // Zero Flag
   this->setAddSubFlag(true);  // Set N Flag
   this->checkHalfCarry(this->reg.A, result);
   this->checkCarry(this->reg.A, result);
@@ -189,8 +179,7 @@ void CPU::SUB(uint8_t u8) {                 // SUB A, u8
   uint8_t result = this->reg.A - u8;
 
   // Set Flags
-  if (result == 0)                   // Zero Flag
-    this->setZeroFlag(true);
+  this->setZeroFlag(result == 0);     // Zero Flag
   this->setAddSubFlag(true);  // Set N Flag
   this->checkHalfCarry(this->reg.A, result);
   this->checkCarry(this->reg.A, result);
@@ -211,8 +200,7 @@ void CPU::XOR(uint8_t u8) {                 // XOR A, u8
 
   // Set Flags
   this->reg.F = 0x00;                // Reset Flags
-  if (result == 0)                   // Zero Flag
-    this->setZeroFlag(true);
+  this->setZeroFlag(result == 0);     // Zero Flag
 
   this->reg.A = result;
 }
@@ -294,8 +282,7 @@ void CPU::SWAP(uint8_t *r8) {               // SWAP r8
   uint8_t result = L | R;
 
   // Set Flags
-  if (result == 0)                     // Zero Flag
-    this->setZeroFlag(true);
+  this->setZeroFlag(result == 0);     // Zero Flag
   this->setAddSubFlag(false);     // Unset N Flag
   this->setHalfCarryFlag(false);  // Unset Half Carry Flag
   this->setCarryFlag(false);      // Unset Carry Flag
@@ -574,7 +561,7 @@ void CPU::CALL(uint16_t u16) {                  // CALL, u16
   this->PUSH(&this->PC);
 
   // JP to address
-  this->PC = u16;
+  this->PC = u16 - 0x03;
 }
 
 void CPU::CALL(ConditionCode cc, uint16_t a16) {   // CALL cc, u16
@@ -602,8 +589,12 @@ void CPU::CALL(ConditionCode cc, uint16_t a16) {   // CALL cc, u16
   this->extraCycles = 0;
 }
 
-void CPU::JP(uint16_t a16) {                    // JP HL | JP u16
-  this->PC = a16;
+void CPU::JP(uint16_t a16) {                    // JP u16
+  this->PC = a16 - 0x03;
+}
+
+void CPU::JPHL(uint16_t a16) {                  // JP HL
+  this->PC = a16 - 0x01;
 }
 
 void CPU::JP(ConditionCode cc, uint16_t a16) {  // JP cc, u16
@@ -641,19 +632,19 @@ void CPU::JR(ConditionCode cc, int8_t e8) {     // JR cc, e8
   switch (cc) {
     case Z:
       if ((this->reg.F & 0x80) != 0)
-        return this->JR(e8);
+        return this->JR(e8 - 2);
       break;
     case NZ:
       if ((this->reg.F & 0x80) == 0)
-        return this->JR(e8);
+        return this->JR(e8 - 2);
       break;
     case C:
       if ((this->reg.F & 0x10) != 0)
-        return this->JR(e8);
+        return this->JR(e8 - 2);
       break;
     case NC:
       if ((this->reg.F & 0x10) == 0)
-        return this->JR(e8);
+        return this->JR(e8 - 2);
       break;
   }
 
@@ -687,6 +678,7 @@ void CPU::RET(ConditionCode cc) {                 // RET cc
 
 void CPU::RET() {                                // RET
   this->POP(&this->PC);
+  this->PC -= 0x01;
 }
 
 void CPU::RETI() {                              // RETI

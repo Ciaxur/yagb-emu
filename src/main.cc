@@ -6,7 +6,6 @@
 
 // Global Variables
 SDL_Window *window;
-bool isLoop = true;
 
 
 void handleEventPolling() {
@@ -15,7 +14,6 @@ void handleEventPolling() {
   while (SDL_PollEvent(&windowEvent) != 0) {
     // Check if close button was clicked
     if (windowEvent.type == SDL_QUIT) {
-      isLoop = false;
       return;
     }
 
@@ -36,9 +34,14 @@ void handleEventPolling() {
 int main(int argc, char **argv) {
   std::cout << "Starting YAGB-Emu..." << std::endl;
 
+  if (argc < 2) {
+    perror("No ROM Path Given");
+    exit(1);
+  }
   // Initiate the CPU
   std::cout << "Initiating the CPU...\n";
-  CPU cpu("misc/drmario.gb");
+  std::cout << "Loading ROM '" << argv[1] << "'...\n";
+  CPU cpu(argv[1]);
 
   // SDL Variables
   SDL_Renderer *renderer;                 // Default SDL Renderer Used
@@ -82,7 +85,8 @@ int main(int argc, char **argv) {
   uint32_t frameCount = 0;
   uint32_t FPS = 0;
 
-  while (isLoop) {
+
+  while (cpu.isRunning()) {
     // Measure the Speed (FPS)
     uint32_t currentTime = SDL_GetTicks();
     frameCount++;

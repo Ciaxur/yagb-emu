@@ -57,16 +57,34 @@ void Memory::dumpROM(std::string ROMPath) {
  * @param out Output Stream
  */
 void Memory::dump(std::ostream &out) {
+  std::ios init(nullptr);
+  init.copyfmt(out);
+  out << std::hex << std::uppercase << std::setfill('0') << std::setw(4) << 0 << ": ";
+
+  int j = 0;
   for (int i = 0; i < 0xFFFF; i++) {
-    out << memory[i];
+    if (j == 16) {
+      j = 0;
+      out << "\n" << std::setw(4) << i << ": ";
+    }
+    j++;
+    out << std::setw(2) << (int)memory[i] << (j == 8 ? "\t\t" : " ");
   }
+  out.copyfmt(init);
 }
 
 // TODO:
 uint8_t Memory::read(uint16_t address) {
-  // TODO: OAM
+  //std::cout << "Accessing Address: " << address << std::endl;
 
-  return memory[address];
+  // TODO: OAM
+  if (address >= 0x0000 && address < 0xFFFF) {
+    return memory[address];
+  }
+  else {
+      std::cout << "Memory.read [" << std::hex << address << std::dec << "]: YO OUT OF RANGE!\n";
+      // TODO: Halt CPU Loop
+  }
 }
 
 void Memory::write(uint16_t address, uint8_t value) {
@@ -74,6 +92,11 @@ void Memory::write(uint16_t address, uint8_t value) {
   // TODO: MBC Switch
   if (address < 0x7FFF) {
 
+  }
+
+  // Output Serial Link
+  else if (address == 0xFF02 && value == 0x81) {
+    std::cout << "Serial Link Value: " << std::hex << (int)this->read(0xFF01) << '\n';
   }
 
   // VRAM Write
