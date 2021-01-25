@@ -5,6 +5,16 @@
 - [ ] makefile 
   - [x] Linux
   - [ ] Windows
+  
+### Debugging
+- [x] Implemented Basic ImGUI
+- [ ] Add Display Window
+- [ ] Memory Editor
+- [ ] Instructions Execution Window
+- [ ] CPU State Window
+- [ ] Stepping Functionality
+  - Per Frame & Instruction
+  - Break after specified cycle count
 
 ### CPU
 - [x] Implement Registers
@@ -14,7 +24,7 @@
 
 ### Memory
 - [x] Use Byte Array for Memory Map
-- [ ] Read/Write Methods
+- [x] Read/Write Methods
 - [x] Populate Memory from ROM
 
 ### Opcode

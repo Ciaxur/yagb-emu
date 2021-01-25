@@ -1,7 +1,8 @@
 MAIN = $(wildcard src/*.cc)
+IMGUI = $(wildcard include/imgui/*.cpp) include/imgui/backends/imgui_impl_sdl.cpp include/imgui/backends/imgui_impl_opengl3.cpp
 BUILD = build
 CC = g++
-INCLUDES = -I ./include
+INCLUDES = -I ./include -I ./include/imgui -I ./include/imgui/backends
 FLAGS =
 OUT = $(BUILD)/yagb-emu
 
@@ -13,7 +14,7 @@ $(info Windows Variables Init)
     FLAGS += -w -lmingw32 -lSDL2main -lSDL2
 else
 $(info Non-Windows Variables Init)
-	FLAGS += $(shell sdl2-config --cflags --libs)
+	FLAGS += $(shell sdl2-config --cflags --libs) $(shell pkg-config --libs glew)
 endif
 
 
@@ -25,7 +26,7 @@ build: prebuild
 ifeq ($(wildcard $(BUILD)),)
 	$(shell mkdir $(BUILD))
 endif
-	$(CC) $(MAIN) $(INCLUDES) $(FLAGS) -o $(OUT)
+	$(CC) $(MAIN) $(IMGUI) $(INCLUDES) $(FLAGS) -o $(OUT)
 	$(info Building Binary)
 
 # Cleans up the Build Directory

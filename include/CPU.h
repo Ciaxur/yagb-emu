@@ -219,4 +219,5 @@ public:
     void nextFrame();               // Runs 60 Iterations / Seconds until no more free cycles pre Frame
     void dump(std::ostream &out, bool isHeader = true, char endChar = '\n');   // Dumps Registers & CPU Dependant States
     const bool isRunning();
+    void stop();
 };

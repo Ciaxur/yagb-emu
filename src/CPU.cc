@@ -7,7 +7,7 @@
  *  Memory from the given ROM
  * @param ROMPath Path to the ROM
  */
-CPU::CPU(std::string ROMPath): memory(ROMPath), cpuExecDump("cpu_exec.dump", std::ios::out) {
+CPU::CPU(std::string ROMPath): memory(ROMPath) {
   // Default Values
   lineCycles = TOTAL_LINE_CYCLES;
   extraCycles = 0;
@@ -138,14 +138,6 @@ void CPU::checkCarry(uint8_t prev, uint16_t after) { // Overflow from 7th Bit
       this->reg.F |= 0x10;                    // Set C Flag
 }
 
-// DEBUG: Figuring out a Bug, Remove/Refactor when done
-int debugFrame = 0;
-int DEUBG_LY = 0;
-bool isDebug = false;
-int debugRuns = 0;
-#define MAX_FRAMES 250
-
-
 /**
  * Main Run Function for the CPU
  *  - Executes Instructions
@@ -154,36 +146,11 @@ int debugRuns = 0;
 void CPU::nextFrame() {
   lineCycles = TOTAL_LINE_CYCLES;
 
-  // DEBUG: Stop at given Frame
-  if (debugFrame >= MAX_FRAMES) {
-    this->running = false;
-
-    // Dumpith
-    // CPU Dump
-    std::cout << "Dumping CPU State to 'cpu_state.dump'\n";
-    std::ofstream out("cpu_state.dump", std::ios::out);
-    dump(out);
-    out.close();
-
-    std::cout << "Dumping Memory to 'mem.dump'\n";
-    std::ofstream out2("mem.dump", std::ios::out);
-    memory.dump(out2);
-    out2.close();
-
-    return;
-  }
-
   // Prompt PPU to Generate Scanline
-  cpuExecDump << "======= FRAME " << std::dec << debugFrame << " =======\n";
-  debugFrame++;
   for (int LY = 0; LY <= 153; LY++) {
-    if (isDebug) cpuExecDump << "== SCANLINE " << std::dec << LY << " ==\n";
-    DEUBG_LY = LY;
     ppu->generateScanline(LY);
-
     if (!this->running) return;
   }
-  cpuExecDump << "\n\n";
 }
 
 /**
@@ -237,7 +204,7 @@ void CPU::executeInstructions(int cycles) {
 
   while (cyclesLeft > 0) {
     // Verify PC Validity
-    if (PC == 0x01 || this->PC > 0xFFFF || this->PC < 0x0000) {
+    if (PC < 0x100 || this->PC > 0xFFFF || this->PC < 0x0000) {
       std::cout << "Something went wrong...\n";
       std::cout << "Invalid PC = " << this->PC << '\n';
       this->running = false;
@@ -251,7 +218,6 @@ void CPU::executeInstructions(int cycles) {
       return;
     }
 
-
     // Get Opcode Value
     uint8_t currentOpcode = this->memory.read(this->PC);
 
@@ -263,25 +229,6 @@ void CPU::executeInstructions(int cycles) {
       opcodeObj = pMap[currentOpcode + 1];
     }
 
-    // DEBUG:
-    if (isDebug) {
-      std::ios init(NULL);
-      init.copyfmt(cpuExecDump);
-      uint8_t arg1 = this->memory.read(PC + 0x01);
-      uint8_t arg2 = this->memory.read(PC + 0x02);
-      uint8_t arg3 = this->memory.read(PC + 0x03);
-      cpuExecDump << std::setfill('0') << std::setw(4) << std::uppercase << std::hex << this->PC << ": " << std::setw(2) << (int)currentOpcode
-        << " " << std::setw(2) << (int)arg1
-        << " " << std::setw(2) << (int)arg2
-        << " " << std::setw(2) << (int)arg3
-        << "\t\t\t\t";
-      cpuExecDump << opcodeObj->label << '\n';
-      cpuExecDump.copyfmt(init);
-      cpuExecDump << '\t';
-      dump(cpuExecDump, false, ' ');
-      cpuExecDump << '\n';
-    }
-
     // Exec Opcode
     opcodeObj->exec();
 
@@ -291,12 +238,6 @@ void CPU::executeInstructions(int cycles) {
 
     // Set new PC
     this->PC += opcodeObj->length;
-
-//    debugRuns++;
-
-//    if (debugRuns > 10000) {
-//      this->running = false;
-//    }
   }
 }
 
@@ -309,3 +250,9 @@ void CPU::handleInterrupt() {
   }
 }
 
+/**
+ * Stops the entire program
+ */
+void CPU::stop() {
+  this->running = false;
+}
