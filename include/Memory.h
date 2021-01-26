@@ -9,12 +9,12 @@
 class CPU;    // Forward Declaration
 class Memory {
 private:
-    uint8_t memory[0xFFFF] = {};
     uint8_t cartType;
     std::vector<uint8_t> disassembledROM;
     void dumpROM(std::string ROMPath);
 
 protected:
+    uint8_t memory[0xFFFF] = {};
     friend class CPU;
     uint8_t *LCDMode;       // Points to PPU's LCD Mode
 

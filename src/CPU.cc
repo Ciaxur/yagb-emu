@@ -256,3 +256,11 @@ void CPU::handleInterrupt() {
 void CPU::stop() {
   this->running = false;
 }
+
+/**
+ * Returns a pointer to Memory
+ * @returns Constant Pointer to Memory Object
+ */
+const uint8_t* CPU::getMemory() {
+  return this->memory.memory;
+}

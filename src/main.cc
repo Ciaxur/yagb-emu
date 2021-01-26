@@ -2,6 +2,7 @@
 #include "../include/imgui/imgui.h"
 #include "../include/imgui/backends/imgui_impl_sdl.h"
 #include "../include/imgui/backends/imgui_impl_opengl3.h"
+#include "../include/imgui_club/imgui_memory_editor/imgui_memory_editor.h"
 #include <SDL2/SDL.h>
 #include <GL/glew.h>            // Initialize with glewInit()
 #include <iostream>
@@ -10,59 +11,24 @@
 // Global Variables
 SDL_Window *window;
 
-// TODO:
-inline void drawImGui(ImGuiIO& io) {
-  // Start the Dear ImGui frame
-  ImGui_ImplOpenGL3_NewFrame();
-  ImGui_ImplSDL2_NewFrame(window);
-  ImGui::NewFrame();
-
-  // Our state
-  bool show_demo_window = true;
-  bool show_another_window = false;
-  ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-  ImGui::ShowDemoWindow(&show_demo_window);
-
-  // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-  {
-    static float f = 0.0f;
-    static int counter = 0;
-
-    ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-    ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-    ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-    ImGui::Checkbox("Another Window", &show_another_window);
-
-    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-    ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-    if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-      counter++;
-    ImGui::SameLine();
-    ImGui::Text("counter = %d", counter);
-
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-    ImGui::End();
-  }
-
-  // 3. Show another simple window.
-  if (show_another_window)
-  {
-    ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-    ImGui::Text("Hello from another window!");
-    if (ImGui::Button("Close Me"))
-      show_another_window = false;
-    ImGui::End();
-  }
-
-  // Rendering
+inline void render(ImVec4 clear_color, ImGuiIO& io) {
   ImGui::Render();
   glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
   glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
   glClear(GL_COLOR_BUFFER_BIT);
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
   SDL_GL_SwapWindow(window);
+}
+
+inline void ImGui_NewFrame() {
+  // Start the Dear ImGui frame
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplSDL2_NewFrame(window);
+  ImGui::NewFrame();
+}
+
+// TODO:
+inline void drawImGui(ImGuiIO& io) {
 }
 
 void handleEventPolling(CPU *cpu) {
@@ -180,12 +146,14 @@ int main(int argc, char **argv) {
   uint32_t frameCount = 0;
   uint32_t FPS = 0;
 
+  MemoryEditor mem_edit;
+
 
   while (cpu.isRunning()) {
     // Measure the Speed (FPS)
     uint32_t currentTime = SDL_GetTicks();
     frameCount++;
-    if (currentTime - lastTime >= 1000) {   // 1 Second Elapsed
+    if (currentTime - lastTime >= 1000) { // 1 Second Elapsed
       FPS = frameCount;
       frameCount = 0;
       lastTime += 1000;
@@ -201,17 +169,25 @@ int main(int argc, char **argv) {
     sprintf(titleBuffer, "%s [%d FPS]", title, FPS);
     SDL_SetWindowTitle(window, titleBuffer);
 
+    SDL_SetTextureColorMod(texture, 255, 0, 0);
 
-    // Clear Screen
-//    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-//    SDL_RenderClear(renderer);
+    // Init Frame & Draw Texture
+    ImGui_NewFrame();
+    {
+      ImGui::Begin("Emulator");
+      ImGui::Text("Pointer = %p", texture);
+      ImGui::Text("Size = %d x %d", WIDTH_pixel, HEIGHT_pixel);
+      ImGui::Image((void*) texture, ImVec2(WIDTH_pixel, HEIGHT_pixel));
+      ImGui::End();
+    }
 
-    // Draw Here...
-//    SDL_RenderCopy(renderer, texture, nullptr, nullptr);
-//    SDL_RenderPresent(renderer);
+    mem_edit.DrawWindow("Memory Editor", (void*)cpu.getMemory(), 0xFFFF);
 
     // Draw ImGUI
     drawImGui(io);
+
+    // Render
+    render({0.45f, 0.55f, 0.60f, 1.00f}, io);
 
     // Keep Track of Overall FrameCount
     overallFrameCount++;

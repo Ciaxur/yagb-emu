@@ -220,4 +220,5 @@ public:
     void dump(std::ostream &out, bool isHeader = true, char endChar = '\n');   // Dumps Registers & CPU Dependant States
     const bool isRunning();
     void stop();
+    const uint8_t *getMemory();
 };
