@@ -24,6 +24,10 @@ endif
 
 all: build
 
+build-debug: prebuild
+	$(info Building Debug Binary)
+	$(CC) $(MAIN) $(IMGUI) $(INCLUDES) $(FLAGS) -g -o $(OUT)
+
 # Cached Version of the Build
 build-cached:
 ifneq ($(wildcard $(CACHE)),)

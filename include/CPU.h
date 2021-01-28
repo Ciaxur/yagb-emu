@@ -2,12 +2,14 @@
 #include <stdint.h>
 #include <string>
 #include <unordered_map>
+#include <deque>
 
 #include "Opcode.h"
 #include "Memory.h"
 
 // Pre-defined Macros
 #define TOTAL_LINE_CYCLES 114
+#define TOTAL_INSTR_PER_FRAME 17556
 
 struct Register {
     uint8_t A;
@@ -184,6 +186,10 @@ protected:
     int lineCycles;     // Total 114
     int extraCycles;
 
+public: // Public Variables
+    std::deque<std::string> instructionStack;
+    unsigned long totalInstructions = 0;
+
 private:
     std::unordered_map<uint16_t, Opcode*> oMap; // Opcode Map
     std::unordered_map<uint16_t, Opcode*> pMap; // Prefix Map
@@ -197,7 +203,6 @@ private:
     std::ofstream cpuExecDump;
 
     void handleInterrupt();
-    void executeInstructions(int cycles);
 
     // Flag Methods
     void setZeroFlag(bool state);
@@ -217,6 +222,7 @@ public:
     CPU(std::string ROMPath);
     ~CPU();
     void nextFrame();               // Runs 60 Iterations / Seconds until no more free cycles pre Frame
+    void executeInstructions(int cycles);
     void dump(std::ostream &out, bool isHeader = true, char endChar = '\n');   // Dumps Registers & CPU Dependant States
     const bool isRunning();
     void stop();

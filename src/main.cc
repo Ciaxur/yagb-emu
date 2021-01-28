@@ -27,8 +27,8 @@ inline void ImGui_NewFrame() {
   ImGui::NewFrame();
 }
 
-// TODO:
-inline void drawImGui(ImGuiIO& io) {
+// TODO: Later Clean up
+inline void drawImGui() {
 }
 
 void handleEventPolling(CPU *cpu) {
@@ -58,7 +58,7 @@ void handleEventPolling(CPU *cpu) {
 }
 
 
-int main(int argc, char **argv) {
+int main(int argc, char *argv[]) {
   std::cout << "Starting YAGB-Emu..." << std::endl;
 
   if (argc < 2) {
@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
   // Initiate the CPU
   std::cout << "Initiating the CPU...\n";
   std::cout << "Loading ROM '" << argv[1] << "'...\n";
-  CPU cpu(argv[1]);
+  CPU *cpu = new CPU(argv[1]);
 
   // SDL Variables
   SDL_Renderer *renderer;                 // Default SDL Renderer Used
@@ -79,6 +79,8 @@ int main(int argc, char **argv) {
   char titleBuffer[256];                  // Used for Temporary Character Storage (Window Title)
   const int WIDTH_pixel = 400;
   const int HEIGHT_pixel = 400;
+  const int WINDOW_WIDTH = 1600;
+  const int WINDOW_HEIGHT = 1000;
   const int RES_SCALE = 1;
 
   /* Configure SDL Properties */
@@ -101,8 +103,8 @@ int main(int argc, char **argv) {
       title,
       SDL_WINDOWPOS_UNDEFINED,
       SDL_WINDOWPOS_UNDEFINED,
-      WIDTH_pixel * RES_SCALE,
-      HEIGHT_pixel * RES_SCALE,
+      WINDOW_WIDTH,
+      WINDOW_HEIGHT,
       window_flags);
   renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
   texture = SDL_CreateTexture(
@@ -149,7 +151,7 @@ int main(int argc, char **argv) {
   MemoryEditor mem_edit;
 
 
-  while (cpu.isRunning()) {
+  while (cpu->isRunning()) {
     // Measure the Speed (FPS)
     uint32_t currentTime = SDL_GetTicks();
     frameCount++;
@@ -159,11 +161,8 @@ int main(int argc, char **argv) {
       lastTime += 1000;
     }
 
-    // Run CPU
-    cpu.nextFrame();
-
     // Handle Event Polling
-    handleEventPolling(&cpu);
+    handleEventPolling(cpu);
 
     // Update Title: Output FPS to Window Title
     sprintf(titleBuffer, "%s [%d FPS]", title, FPS);
@@ -181,10 +180,47 @@ int main(int argc, char **argv) {
       ImGui::End();
     }
 
-    mem_edit.DrawWindow("Memory Editor", (void*)cpu.getMemory(), 0xFFFF);
+    mem_edit.DrawWindow("Memory Editor", (void*)cpu->getMemory(), 0xFFFF);
+    {
+      ImGui::Begin("Debug");
 
-    // Draw ImGUI
-    drawImGui(io);
+      ImGui::BeginGroup();
+      if (ImGui::Button("Reset")) {
+        delete cpu;
+        cpu = new CPU(argv[1]);
+      }
+      ImGui::SameLine();
+      if (ImGui::Button("Step Instruction")) {
+        cpu->executeInstructions(1);
+      }
+      ImGui::SameLine();
+      if (ImGui::Button("Step Frame")) {
+        cpu->nextFrame();
+      }
+      ImGui::EndGroup();
+      ImGui::Text("Frame Count: %d", cpu->totalInstructions / TOTAL_INSTR_PER_FRAME);
+      ImGui::Text("Instruction Count: %d", cpu->totalInstructions);
+
+      for (int i=0; i < cpu->instructionStack.size(); i++) {
+        if (i == cpu->instructionStack.size() - 1)
+          ImGui::Text("> %s", cpu->instructionStack[i].c_str());
+        else
+          ImGui::Text(cpu->instructionStack[i].c_str());
+      }
+
+      ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+      ImGui::End();
+    }
+
+    // CPU Flags
+    {
+      ImGui::Begin("CPU State");
+      std::ostringstream ss;
+      cpu->dump(ss);
+      ImGui::Text(ss.str().c_str());
+
+      ImGui::End();
+    }
 
     // Render
     render({0.45f, 0.55f, 0.60f, 1.00f}, io);
@@ -201,6 +237,7 @@ int main(int argc, char **argv) {
 
 
   // Clean up
+  delete cpu;
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplSDL2_Shutdown();
   ImGui::DestroyContext();

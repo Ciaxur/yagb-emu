@@ -197,6 +197,7 @@ const bool CPU::isRunning() {
  */
 void CPU::executeInstructions(int cycles) {
   int cyclesLeft = cycles;
+  totalInstructions += cycles;
   handleInterrupt();
 
   // Early Exit
@@ -231,6 +232,14 @@ void CPU::executeInstructions(int cycles) {
 
     // Exec Opcode
     opcodeObj->exec();
+
+    // Keep track of Previous 10 Instructions
+    std::ostringstream ss;
+    ss << std::hex << std::uppercase;
+    ss << PC << ": " << opcodeObj->label;
+    instructionStack.push_back(ss.str());
+    if (instructionStack.size() >= 20)
+      instructionStack.pop_front();
 
     // Decrement CyclesLeft & Additional Cycles taken by Opcode
     cyclesLeft -= this->extraCycles + opcodeObj->machineCycles;
