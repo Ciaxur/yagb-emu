@@ -197,13 +197,15 @@ const bool CPU::isRunning() {
  */
 void CPU::executeInstructions(int cycles) {
   int cyclesLeft = cycles;
-  totalInstructions += cycles;
+  totalCycles += cycles;
   handleInterrupt();
 
   // Early Exit
   if (!this->running) return;
 
   while (cyclesLeft > 0) {
+    totalInstructions++;
+
     // Verify PC Validity
     if (PC < 0x100 || this->PC > 0xFFFF || this->PC < 0x0000) {
       std::cout << "Something went wrong...\n";
@@ -230,9 +232,6 @@ void CPU::executeInstructions(int cycles) {
       opcodeObj = pMap[currentOpcode + 1];
     }
 
-    // Exec Opcode
-    opcodeObj->exec();
-
     // Keep track of Previous 10 Instructions
     std::ostringstream ss;
     ss << std::hex << std::uppercase;
@@ -240,6 +239,9 @@ void CPU::executeInstructions(int cycles) {
     instructionStack.push_back(ss.str());
     if (instructionStack.size() >= 20)
       instructionStack.pop_front();
+
+    // Exec Opcode
+    opcodeObj->exec();
 
     // Decrement CyclesLeft & Additional Cycles taken by Opcode
     cyclesLeft -= this->extraCycles + opcodeObj->machineCycles;

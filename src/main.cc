@@ -10,6 +10,10 @@
 
 // Global Variables
 SDL_Window *window;
+struct KeyboardState {
+    bool step_instr = false;
+    int step_instr_hold = 0;    // Iterations Held
+} keystate;
 
 inline void render(ImVec4 clear_color, ImGuiIO& io) {
   ImGui::Render();
@@ -33,7 +37,7 @@ inline void drawImGui() {
 
 void handleEventPolling(CPU *cpu) {
   SDL_Event windowEvent;
-  
+
   while (SDL_PollEvent(&windowEvent) != 0) {
     ImGui_ImplSDL2_ProcessEvent(&windowEvent);
 
@@ -47,8 +51,21 @@ void handleEventPolling(CPU *cpu) {
     switch (windowEvent.type) {
     // Handle Key Presses
     case SDL_KEYDOWN:
+      if (windowEvent.key.keysym.sym == SDL_KeyCode::SDLK_s) {
+        if (keystate.step_instr_hold == 0)
+          keystate.step_instr = true;
+        keystate.step_instr_hold++;
+      }
+
+
+      break;
     case SDL_KEYUP:
       // TODO: Key Press Here
+       if (windowEvent.key.keysym.sym == SDL_KeyCode::SDLK_s) {
+         keystate.step_instr = false;
+         keystate.step_instr_hold = 0;
+       }
+
       break;
 
     default:
@@ -174,6 +191,7 @@ int main(int argc, char *argv[]) {
     ImGui_NewFrame();
     {
       ImGui::Begin("Emulator");
+      ImGui::Text("ROM: %s", argv[1]);
       ImGui::Text("Pointer = %p", texture);
       ImGui::Text("Size = %d x %d", WIDTH_pixel, HEIGHT_pixel);
       ImGui::Image((void*) texture, ImVec2(WIDTH_pixel, HEIGHT_pixel));
@@ -181,6 +199,9 @@ int main(int argc, char *argv[]) {
     }
 
     mem_edit.DrawWindow("Memory Editor", (void*)cpu->getMemory(), 0xFFFF);
+
+    // Debug Window
+    static int stepInstrCount = 1;
     {
       ImGui::Begin("Debug");
 
@@ -190,16 +211,20 @@ int main(int argc, char *argv[]) {
         cpu = new CPU(argv[1]);
       }
       ImGui::SameLine();
-      if (ImGui::Button("Step Instruction")) {
-        cpu->executeInstructions(1);
+      if (ImGui::Button("Step Instruction") || keystate.step_instr || (keystate.step_instr_hold > 10)) {
+        keystate.step_instr = false;
+        for (int i=0; i<stepInstrCount; i++)
+          cpu->executeInstructions(1);
       }
       ImGui::SameLine();
       if (ImGui::Button("Step Frame")) {
         cpu->nextFrame();
       }
       ImGui::EndGroup();
-      ImGui::Text("Frame Count: %d", cpu->totalInstructions / TOTAL_INSTR_PER_FRAME);
+      ImGui::InputInt("Instruction Count", &stepInstrCount);
+      ImGui::Text("Frame Count: %d", cpu->totalCycles / TOTAL_INSTR_PER_FRAME);
       ImGui::Text("Instruction Count: %d", cpu->totalInstructions);
+      ImGui::Text("Cycle Count: %d", cpu->totalCycles);
 
       for (int i=0; i < cpu->instructionStack.size(); i++) {
         if (i == cpu->instructionStack.size() - 1)

@@ -189,6 +189,7 @@ protected:
 public: // Public Variables
     std::deque<std::string> instructionStack;
     unsigned long totalInstructions = 0;
+    unsigned long totalCycles = 0;
 
 private:
     std::unordered_map<uint16_t, Opcode*> oMap; // Opcode Map

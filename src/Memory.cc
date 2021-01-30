@@ -116,5 +116,6 @@ void Memory::write(uint16_t address, uint8_t value) {
 
   else {
     // Writing out of range
+    std::cout << "Memory.write [" << std::hex << address << std::dec << "]: INVALID RANGE!\n";
   }
 }

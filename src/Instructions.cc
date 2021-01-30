@@ -558,7 +558,8 @@ void CPU::LDAHLD() {                        // LD A, [HLD]
 
 void CPU::CALL(uint16_t u16) {                  // CALL, u16
   // Push Address to Stack
-  this->PUSH(&this->PC);
+  uint16_t offsetAddr = this->PC + 0x03;        // Offset from CALL
+  this->PUSH(&offsetAddr);
 
   // JP to address
   this->PC = u16 - 0x03;
@@ -632,19 +633,19 @@ void CPU::JR(ConditionCode cc, int8_t e8) {     // JR cc, e8
   switch (cc) {
     case Z:
       if ((this->reg.F & 0x80) != 0)
-        return this->JR(e8 - 2);
+        return this->JR(e8);
       break;
     case NZ:
       if ((this->reg.F & 0x80) == 0)
-        return this->JR(e8 - 2);
+        return this->JR(e8);
       break;
     case C:
       if ((this->reg.F & 0x10) != 0)
-        return this->JR(e8 - 2);
+        return this->JR(e8);
       break;
     case NC:
       if ((this->reg.F & 0x10) == 0)
-        return this->JR(e8 - 2);
+        return this->JR(e8);
       break;
   }
 
