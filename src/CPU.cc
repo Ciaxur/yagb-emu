@@ -9,7 +9,7 @@
  */
 CPU::CPU(std::string ROMPath): memory(ROMPath) {
   // Default Values
-  lineCycles = TOTAL_LINE_CYCLES;
+  cyclesLeft = 114;
   extraCycles = 0;
   halted = false;
   running = true;
@@ -81,6 +81,16 @@ CPU::~CPU() {
 };
 
 /**
+ * Handles Ticking CPU + PPU States
+ */
+void CPU::tick() {
+  if (!halted)
+    ppu->execute();
+  else
+    handleInterrupt();
+}
+
+/**
  * Sets the Z Flag (Bit 7) to given State
  * @param state State of the Flag
  */
@@ -139,21 +149,6 @@ void CPU::checkCarry(uint8_t prev, uint16_t after) { // Overflow from 7th Bit
 }
 
 /**
- * Main Run Function for the CPU
- *  - Executes Instructions
- *  - Communications between PPU & Memory
- */
-void CPU::nextFrame() {
-  lineCycles = TOTAL_LINE_CYCLES;
-
-  // Prompt PPU to Generate Scanline
-  for (int LY = 0; LY <= 153; LY++) {
-    ppu->generateScanline(LY);
-    if (!this->running) return;
-  }
-}
-
-/**
  * Dumps all CPU Dependant States ie. Registers
  * @param out Output stream to dump to
  */
@@ -177,8 +172,16 @@ void CPU::dump(std::ostream &out, bool isHeader, char endChar) {
 
   if (isHeader) out << "\n== STATES ==\n";
   out << std::uppercase << std::hex << "\t IME: " << IME << endChar;
+  out << std::uppercase << std::hex << "\t LY: " << (int)ppu->LY << endChar;
+  out << std::uppercase << std::dec << "\t FRAME: " << ppu->currentFrame << endChar;
   out << std::uppercase << std::hex << "\t HALTED: " << halted << endChar;
   out << std::uppercase << std::hex << "\t RUNNING: " << running << endChar;
+
+  if (isHeader) out << "\n== FLAGS ==\n";
+  out << std::uppercase << std::hex << "\t Z: " << ((reg.F & 0x80) >> 7) << endChar;
+  out << std::uppercase << std::hex << "\t N: " << ((reg.F & 0x40) >> 6) << endChar;
+  out << std::uppercase << std::hex << "\t H: " << ((reg.F & 0x20) >> 5) << endChar;
+  out << std::uppercase << std::hex << "\t C: " << ((reg.F & 0x10) >> 4) << endChar;
 
   // Revert Formatting Back
   out.copyfmt(init);
@@ -195,61 +198,61 @@ const bool CPU::isRunning() {
  * Handle CPU Instructions from PC! 🤠🤠🤠🤠
  * @param cycles Cycles the CPU is allowed to Run for
  */
-void CPU::executeInstructions(int cycles) {
-  int cyclesLeft = cycles;
-  totalCycles += cycles;
+void CPU::execute() {
+  // Handle Pre-Execution Process
+  if (!this->running) return;
   handleInterrupt();
 
-  // Early Exit
-  if (!this->running) return;
+  // Verify PC Validity
+  if (PC < 0x100 || this->PC > 0xFFFF || this->PC < 0x0000) {
+    std::cout << "Something went wrong...\n";
+    std::cout << "Invalid PC = " << this->PC << '\n';
+    this->running = false;
 
-  while (cyclesLeft > 0) {
-    totalInstructions++;
+    // CPU Dump
+    std::cout << "Dumping CPU State to 'cpu_state.dump'\n";
+    std::ofstream out("cpu_state.dump", std::ios::out);
+    dump(out);
+    out.close();
 
-    // Verify PC Validity
-    if (PC < 0x100 || this->PC > 0xFFFF || this->PC < 0x0000) {
-      std::cout << "Something went wrong...\n";
-      std::cout << "Invalid PC = " << this->PC << '\n';
-      this->running = false;
-
-      // CPU Dump
-      std::cout << "Dumping CPU State to 'cpu_state.dump'\n";
-      std::ofstream out("cpu_state.dump", std::ios::out);
-      dump(out);
-      out.close();
-
-      return;
-    }
-
-    // Get Opcode Value
-    uint8_t currentOpcode = this->memory.read(this->PC);
-
-    // Condition between Opcode & PREFIX Table
-    Opcode *opcodeObj;
-    if (currentOpcode!= 0xCB) {
-      opcodeObj = oMap[currentOpcode];
-    } else {
-      opcodeObj = pMap[currentOpcode + 1];
-    }
-
-    // Keep track of Previous 10 Instructions
-    std::ostringstream ss;
-    ss << std::hex << std::uppercase;
-    ss << PC << ": " << opcodeObj->label;
-    instructionStack.push_back(ss.str());
-    if (instructionStack.size() >= 20)
-      instructionStack.pop_front();
-
-    // Exec Opcode
-    opcodeObj->exec();
-
-    // Decrement CyclesLeft & Additional Cycles taken by Opcode
-    cyclesLeft -= this->extraCycles + opcodeObj->machineCycles;
-    this->extraCycles = 0;
-
-    // Set new PC
-    this->PC += opcodeObj->length;
+    return;
   }
+
+  // Execute current Instruction
+  // Get Opcode Value
+  uint8_t currentOpcode = this->memory.read(this->PC);
+
+  // Condition between Opcode & PREFIX Table
+  Opcode *opcodeObj;
+  if (currentOpcode!= 0xCB) {
+    opcodeObj = oMap[currentOpcode];
+  } else {
+    opcodeObj = pMap[currentOpcode + 1];
+  }
+
+  // Keep track of Previous 10 Instructions
+  std::ostringstream ss;
+  ss << std::hex << std::uppercase;
+  ss << PC << ": " << opcodeObj->label << " | ";
+  ss << std::hex << std::uppercase
+     << (int)memory.read(PC) << " "
+     << (int)memory.read(PC + 1) << (int)memory.read(PC + 2);
+  instructionStack.push_back(ss.str());
+  if (instructionStack.size() >= 20)
+    instructionStack.pop_front();
+
+  // Exec Opcode
+  opcodeObj->exec();
+
+  // Set new PC
+  this->PC += opcodeObj->length;
+
+  // Keep track of CPU's State
+  // Decrement CyclesLeft & Additional Cycles taken by Opcode
+  totalInstructions++;
+  totalCycles += this->extraCycles + opcodeObj->machineCycles;
+  cyclesLeft -= this->extraCycles + opcodeObj->machineCycles;
+  this->extraCycles = 0;
 }
 
 
@@ -274,4 +277,11 @@ void CPU::stop() {
  */
 const uint8_t* CPU::getMemory() {
   return this->memory.memory;
+}
+
+/**
+ * @return Returns the PPU's Current Frame State
+ */
+const int CPU::getCurrentFrame() {
+  return this->ppu->currentFrame;
 }

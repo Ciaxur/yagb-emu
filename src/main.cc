@@ -214,15 +214,19 @@ int main(int argc, char *argv[]) {
       if (ImGui::Button("Step Instruction") || keystate.step_instr || (keystate.step_instr_hold > 10)) {
         keystate.step_instr = false;
         for (int i=0; i<stepInstrCount; i++)
-          cpu->executeInstructions(1);
+          cpu->tick();
       }
       ImGui::SameLine();
       if (ImGui::Button("Step Frame")) {
-        cpu->nextFrame();
+        int preFrame = cpu->getCurrentFrame();
+        while (preFrame == cpu->getCurrentFrame()) {
+          cpu->tick();
+        }
       }
       ImGui::EndGroup();
       ImGui::InputInt("Instruction Count", &stepInstrCount);
-      ImGui::Text("Frame Count: %d", cpu->totalCycles / TOTAL_INSTR_PER_FRAME);
+      ImGui::Text("Calculated Frame Count: %d", cpu->totalCycles / TOTAL_INSTR_PER_FRAME);
+      ImGui::Text("Frame Count: %d", cpu->getCurrentFrame());
       ImGui::Text("Instruction Count: %d", cpu->totalInstructions);
       ImGui::Text("Cycle Count: %d", cpu->totalCycles);
 

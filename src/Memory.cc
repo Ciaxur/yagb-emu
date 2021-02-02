@@ -88,7 +88,6 @@ uint8_t Memory::read(uint16_t address) {
 }
 
 void Memory::write(uint16_t address, uint8_t value) {
-
   // TODO: MBC Switch
   if (address < 0x7FFF) {
 

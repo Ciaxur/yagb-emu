@@ -183,7 +183,7 @@ protected:
 protected:
     friend class PPU;
     PPU *ppu;
-    int lineCycles;     // Total 114
+    int cyclesLeft;       // State of CPU Cycles to run
     int extraCycles;
 
 public: // Public Variables
@@ -222,10 +222,11 @@ private:
 public:
     CPU(std::string ROMPath);
     ~CPU();
-    void nextFrame();               // Runs 60 Iterations / Seconds until no more free cycles pre Frame
-    void executeInstructions(int cycles);
+    void tick();
+    void execute();
     void dump(std::ostream &out, bool isHeader = true, char endChar = '\n');   // Dumps Registers & CPU Dependant States
     const bool isRunning();
+    const int getCurrentFrame();
     void stop();
     const uint8_t *getMemory();
 };

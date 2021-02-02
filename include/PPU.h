@@ -5,6 +5,8 @@ class PPU {
 protected:
     friend class CPU;
     uint8_t LCDMode;
+    unsigned long currentFrame;
+    uint8_t LY;
 
 private:
     Memory *memory;
@@ -13,5 +15,5 @@ private:
 public:
     PPU(CPU *cpu, Memory *memory);
 
-    void generateScanline(int LY);
+    void execute();
 };

@@ -9,28 +9,49 @@
 PPU::PPU(CPU *cpu, Memory *memory) {
   this->cpu = cpu;
   this->memory = memory;
+  this->LY = 0;
+  this->currentFrame = 0;
 }
 
 /**
- * Generates Scanline with respect to LY and Mode
- * @param LY Current Horizontal Scanline
+ * Executes the PPU based on current state of CPU
+ *  and PPU
  */
-void PPU::generateScanline(int LY) {
-  if (LY < 144) {
-    // Mode 2
-    this->LCDMode = 2;
-    cpu->executeInstructions(20);
+void PPU::execute() {
+  // Set current LY Value for CPU
+  memory->write(0xFF44, this->LY);
 
-    // Mode 3
-    this->LCDMode = 3;
-    cpu->executeInstructions(72);
-
-    // Mode 0
-    this->LCDMode = 0;
-    cpu->executeInstructions(22);
+  // Determine LCDMode based on LY State
+  if (this->LY < 144) {
+    if (cpu->cyclesLeft > 94) {
+      this->LCDMode = 2;
+    } else if (cpu->cyclesLeft > 22) {
+      this->LCDMode = 3;
+    } else if (cpu->cyclesLeft < 22) {
+      this->LCDMode = 0;
+    }
   } else {
-    // Mode 1
     this->LCDMode = 1;
-    cpu->executeInstructions(114);
   }
+
+  // Update PPU and CPU state based on both
+  //  CPU's current States
+  if (cpu->cyclesLeft <= 0) { // End of current scanline
+    if (this->LY < 153) {
+      this->LY++;
+      cpu->cyclesLeft = 114;
+    } else {
+      this->LY = 0;
+      this->currentFrame++;
+      cpu->cyclesLeft = 114;
+    }
+  }
+
+  // TODO: Check if left over cycles (Frequency)
+  if (cpu->cyclesLeft < 0) {}
+
+  // Execute CPU
+  cpu->execute();
+
+  // TODO: Perform PPU functions based on current LCD Mode
 }
