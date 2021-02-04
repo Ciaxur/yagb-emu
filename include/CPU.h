@@ -213,7 +213,7 @@ private:
 
     // Flag Checks
     void checkHalfCarry(uint8_t prev, uint8_t after);
-    void checkCarry(uint8_t prev, uint16_t after);
+    void checkCarry(uint8_t prev, uint16_t after, bool isSubOp = false);
 
     // Initializers
     static void initOpcodes(CPU *cpu);

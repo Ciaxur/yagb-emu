@@ -141,11 +141,15 @@ void CPU::checkHalfCarry(uint8_t prev, uint8_t after) { // Overflow from 3rd Bit
  * @param after Result of the previous value
  * @return Result of the Set (if needed)
  */
-void CPU::checkCarry(uint8_t prev, uint16_t after) { // Overflow from 7th Bit
-  this->reg.F &= 0xEF;                        // Unset C Flag
-  if ((prev & 0xFF) != (after & 0xFF))        // LSB Change
-    if ((prev & 0xFF00) != (after & 0xFF00))  // MSB Change
-      this->reg.F |= 0x10;                    // Set C Flag
+void CPU::checkCarry(uint8_t prev, uint16_t after, bool isSubOp) { // Overflow from 7th Bit
+  this->reg.F &= 0xEF;                         // Unset C Flag
+
+  if (isSubOp && prev > after)
+    this->reg.F |= 0x10;
+
+  else if (isSubOp && (prev & 0xFF) != (after & 0xFF))  // LSB Change
+    if ((prev & 0xFF00) != (after & 0xFF00))            // MSB Change
+      this->reg.F |= 0x10;                              // Set C Flag
 }
 
 /**
@@ -227,7 +231,7 @@ void CPU::execute() {
   if (currentOpcode!= 0xCB) {
     opcodeObj = oMap[currentOpcode];
   } else {
-    opcodeObj = pMap[currentOpcode + 1];
+    opcodeObj = pMap[this->memory.read(this->PC + 1)];
   }
 
   // Keep track of Previous 10 Instructions
@@ -236,7 +240,7 @@ void CPU::execute() {
   ss << PC << ": " << opcodeObj->label << " | ";
   ss << std::hex << std::uppercase
      << (int)memory.read(PC) << " "
-     << (int)memory.read(PC + 1) << (int)memory.read(PC + 2);
+     << (int)memory.read(PC + 2) << " " << (int)memory.read(PC + 1);
   instructionStack.push_back(ss.str());
   if (instructionStack.size() >= 20)
     instructionStack.pop_front();

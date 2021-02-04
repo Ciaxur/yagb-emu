@@ -162,7 +162,7 @@ void CPU::SBC(uint8_t u8) {                 // SBC A, u8
   this->setZeroFlag(result == 0);     // Zero Flag
   this->setAddSubFlag(true);  // Set N Flag
   this->checkHalfCarry(this->reg.A, result);
-  this->checkCarry(this->reg.A, result);
+  this->checkCarry(u8 + (this->reg.F & 0x10), this->reg.A, true);  // Check Carry for Subtraction
 
   this->reg.A = result;
 }
@@ -179,10 +179,10 @@ void CPU::SUB(uint8_t u8) {                 // SUB A, u8
   uint8_t result = this->reg.A - u8;
 
   // Set Flags
-  this->setZeroFlag(result == 0);     // Zero Flag
+  this->setZeroFlag(result == 0);      // Zero Flag
   this->setAddSubFlag(true);  // Set N Flag
   this->checkHalfCarry(this->reg.A, result);
-  this->checkCarry(this->reg.A, result);
+  this->checkCarry(u8, this->reg.A, true);  // Check Carry for Subtraction
 
   this->reg.A = result;
 }
@@ -297,7 +297,7 @@ void CPU::SWAP(uint16_t a16) {             // SWAP [HL]
 /* Bit Shift Instructions */
 
 void CPU::RL(uint8_t *r8) {                // RL r8
-  uint8_t carry = this->reg.F & 0x01;
+  uint8_t carry = (this->reg.F & 0x10) << 3;
 
   // Set Carry flag according to 7th Bit
   this->setCarryFlag((*r8 & 0x80) != 0);
@@ -327,7 +327,7 @@ void CPU::RLC(uint8_t *r8) {               // RLC r8
   this->setCarryFlag((*r8 & 0x80) != 0);
 
   // Carry 7th Bit over
-  *r8 = (*r8 << 1) | (this->reg.F & 0x01);
+  *r8 = (*r8 << 1) | ((this->reg.F & 0x10) >> 4);
 
   // Set Flags
   if (*r8 == 0)
@@ -348,7 +348,7 @@ void CPU::RLCA() {                         // RLCA
 }
 
 void CPU::RR(uint8_t *r8) {                // RR r8
-  uint8_t carry = this->reg.F & 0x01;
+  uint8_t carry = (this->reg.F & 0x10) << 3; // Set to Top Bit
 
   // Set Carry flag according to 7th Bit
   this->setCarryFlag((*r8 & 0x01) != 0);
@@ -369,7 +369,7 @@ void CPU::RR(uint16_t a16) {               // RR [HL]
 }
 
 void CPU::RRA() {                          // RRA
-  this->RL(&this->reg.A);
+  this->RR(&this->reg.A);
   this->setZeroFlag(false);
 }
 
@@ -378,7 +378,7 @@ void CPU::RRC(uint8_t *r8) {                // RRC r8
   this->setCarryFlag((*r8 & 0x01) != 0);
 
   // Carry 7th Bit over
-  *r8 = (*r8 >> 1) | (this->reg.F & 0x01);
+  *r8 = (*r8 >> 1) | ((this->reg.F & 0x10) << 3);
 
   // Set Flags
   if (*r8 == 0)
