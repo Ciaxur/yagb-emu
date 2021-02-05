@@ -9,7 +9,7 @@
 PPU::PPU(CPU *cpu, Memory *memory) {
   this->cpu = cpu;
   this->memory = memory;
-  this->LY = 0;
+  this->LY = 0x90;
   this->currentFrame = 0;
 }
 
@@ -37,18 +37,15 @@ void PPU::execute() {
   // Update PPU and CPU state based on both
   //  CPU's current States
   if (cpu->cyclesLeft <= 0) { // End of current scanline
-    if (this->LY < 153) {
-      this->LY++;
-      cpu->cyclesLeft = 114;
-    } else {
-      this->LY = 0;
+    if (this->LY == 143) {
+      this->LY = 144;
       this->currentFrame++;
-      cpu->cyclesLeft = 114;
+      cpu->cyclesLeft += 114;   // Account for Extra Cycles Taken
+    } else {
+      this->LY = (this->LY + 1) % 154;
+      cpu->cyclesLeft += 114;
     }
   }
-
-  // TODO: Check if left over cycles (Frequency)
-  if (cpu->cyclesLeft < 0) {}
 
   // Execute CPU
   cpu->execute();

@@ -95,7 +95,8 @@ void Memory::write(uint16_t address, uint8_t value) {
 
   // Output Serial Link
   else if (address == 0xFF02 && value == 0x81) {
-    std::cout << "Serial Link Value: " << std::hex << (int)this->read(0xFF01) << '\n';
+//    std::cout << "Serial Link Value: " << std::hex << (int)this->read(0xFF01) << '\n';
+    std::cout << (char)this->read(0xFF01);
   }
 
   // VRAM Write
