@@ -758,7 +758,7 @@ void CPU::initOpcodes(CPU* cpu) {
     cpu->POP(&(cpu->reg.H), &(cpu->reg.L));
   });
   cpu->oMap[0xE2] = new Opcode(0xE2, "LD (FF00+C), A", 2, 1, [cpu]() {
-    cpu->LDHCA();
+    cpu->LD(0xFF00 + cpu->reg.C);
   });
   cpu->oMap[0xE5] = new Opcode(0xE5, "PUSH HL", 4, 1, [cpu]() {
     cpu->PUSH(&(cpu->reg.H), &(cpu->reg.L));
@@ -799,7 +799,7 @@ void CPU::initOpcodes(CPU* cpu) {
     cpu->POPAF();
   });
   cpu->oMap[0xF2] = new Opcode(0xF2, "LD A, (FF00+C)", 2, 1, [cpu]() {
-    cpu->LDHAC();
+    cpu->LDA(0xFF00 + cpu->reg.C);
   });
   cpu->oMap[0xF3] = new Opcode(0xF3, "DI", 1, 1, [cpu]() {
     cpu->DI();
@@ -824,7 +824,7 @@ void CPU::initOpcodes(CPU* cpu) {
   });
   cpu->oMap[0xFA] = new Opcode(0xFA, "LD A, (u16)", 4, 3, [cpu]() {
     uint16_t a16 = (cpu->memory.read(cpu->PC + 2) << 8) | cpu->memory.read(cpu->PC + 1);
-    cpu->LDHA(a16);
+    cpu->LDA(a16);
   });
   cpu->oMap[0xFB] = new Opcode(0xFB, "EI", 1, 1, [cpu]() {
     cpu->EI();

@@ -120,15 +120,9 @@ protected:
     void LD(uint16_t a16, uint8_t u8);    // LD [HL], u8
     void LD(uint8_t *r8, uint16_t a16);   // LD r8, [HL]
 
-    void LD(uint16_t a16);                // LD [r16], A | LD [u16], A
+    void LD(uint16_t a16);                // LD [r16], A | LD [u16], A | LDH [u16], A | LDH [C], A
 
-    void LDH(uint16_t a16);               // LDH [u16], A
-    void LDHCA();                         // LDH [C], A
-
-    void LDA(uint16_t a16);               // LD A, [r16] | LD A, [u16]
-
-    void LDHA(uint16_t a16);              // LD A, [u16]
-    void LDHAC();                         // LDH A, [C]
+    void LDA(uint16_t a16);               // LD A, [r16] | LD A, [u16] | LDH A, [u16] | LDH A, [C]
 
     void LDHLI();                         // LD [HLI], A
     void LDHLD();                         // LD [HLD], A

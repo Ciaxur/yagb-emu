@@ -78,7 +78,7 @@ uint8_t Memory::read(uint16_t address) {
   //std::cout << "Accessing Address: " << address << std::endl;
 
   // TODO: OAM
-  if (address >= 0x0000 && address < 0xFFFF) {
+  if (address >= 0x0000 && address <= 0xFFFF) {
     return memory[address];
   }
   else {

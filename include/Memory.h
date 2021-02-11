@@ -14,9 +14,9 @@ private:
     void dumpROM(std::string ROMPath);
 
 protected:
-    uint8_t memory[0xFFFF] = {};
     friend class CPU;
-    uint8_t *LCDMode;       // Points to PPU's LCD Mode
+    uint8_t memory[65536] = {}; // 0x0000 -> 0xFFFF inclusive (2^16)
+    uint8_t *LCDMode;           // Points to PPU's LCD Mode
 
 public:
     Memory(std::string ROMPath);

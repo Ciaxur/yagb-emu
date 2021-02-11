@@ -19,7 +19,11 @@ PPU::PPU(CPU *cpu, Memory *memory) {
  */
 void PPU::execute() {
   // Set current LY Value for CPU
-  memory->write(0xFF44, this->LY);
+  if (memory->read(0xFF40) & 0x80) {
+    memory->write(0xFF44, this->LY);
+  } else {
+    memory->write(0xFF44, 0);
+  }
 
   // Determine LCDMode based on LY State
   if (this->LY < 144) {

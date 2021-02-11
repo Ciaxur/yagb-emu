@@ -486,32 +486,12 @@ void CPU::LD(uint8_t *r8, uint16_t a16) {   // LD r8, [HL]
   *r8 = this->memory.read(a16);
 }
 
-void CPU::LD(uint16_t a16) {                // LD [r16], A | LD [u16], A
+void CPU::LD(uint16_t a16) {                // LD [r16], A | LD [u16], A | LDH [u16], A | LDH [C], A
   this->memory.write(a16, this->reg.A);
 }
 
-void CPU::LDH(uint16_t a16) {               // LDH [n16], A
-  if (a16 >= 0xFF00 && a16 <= 0xFFFF) {
-    this->memory.write(a16, this->reg.A);
-  }
-}
-
-void CPU::LDHCA() {                          // LDH [C], A
-  this->memory.write(0xFF00 + this->reg.C, this->reg.A);
-}
-
-void CPU::LDA(uint16_t a16) {               // LD A, [r16] | LD A, [u16]
+void CPU::LDA(uint16_t a16) {               // LD A, [r16] | LD A, [u16] | LDH A, [u16] | LDH A, [C]
   this->reg.A = this->memory.read(a16);
-}
-
-void CPU::LDHA(uint16_t a16) {              // LD A, [n16]
-  if (a16 >= 0xFF00 && a16 <= 0xFFFF) {
-    this->reg.A = this->memory.read(a16);
-  }
-}
-
-void CPU::LDHAC() {                         // LDH A, [C]
-  this->reg.A = this->memory.read(0xFF00 + this->reg.C);
 }
 
 void CPU::LDHLI() {            // LD [HLI], A

@@ -1,3 +1,4 @@
+#include <bitset>
 #include "../include/CPU.h"
 #include "../include/OpcodeInit.hpp"
 #include "../include/PPU.h"
@@ -162,30 +163,35 @@ void CPU::dump(std::ostream &out, bool isHeader, char endChar) {
   init.copyfmt(out);
 
   if (isHeader) out << "== REGISTERS ==\n";
-  out << std::setfill('0') << std::uppercase << std::hex << "\t A: " << std::setw(2) << (int)reg.A << endChar;
-  out << std::uppercase << std::hex << "\t B: " << std::setw(2) << (int)reg.B << endChar;
-  out << std::uppercase << std::hex << "\t C: " << std::setw(2) << (int)reg.C << endChar;
-  out << std::uppercase << std::hex << "\t D: " << std::setw(2) << (int)reg.D << endChar;
-  out << std::uppercase << std::hex << "\t E: " << std::setw(2) << (int)reg.E << endChar;
-  out << std::uppercase << std::hex << "\t F: " << std::setw(2) << (int)reg.F << endChar;
-  out << std::uppercase << std::hex << "\t H: " << std::setw(2) << (int)reg.H << endChar;
-  out << std::uppercase << std::hex << "\t L: " << std::setw(2) << (int)reg.L << endChar;
-  out << std::uppercase << std::hex << "\t HL: " << std::setw(4) << (int)((reg.H << 8) | reg.L) << endChar;
-  out << std::uppercase << std::hex << "\t SP: " << std::setw(4) << SP << endChar;
-  out << std::uppercase << std::hex << "\t PC: " << std::setw(4) << PC << endChar;
+  out << std::setfill('0') << std::uppercase << std::hex << "  A: " << std::setw(2) << (int)reg.A << endChar;
+  out << std::uppercase << std::hex << "  B: " << std::setw(2) << (int)reg.B << endChar;
+  out << std::uppercase << std::hex << "  C: " << std::setw(2) << (int)reg.C << endChar;
+  out << std::uppercase << std::hex << "  D: " << std::setw(2) << (int)reg.D << endChar;
+  out << std::uppercase << std::hex << "  E: " << std::setw(2) << (int)reg.E << endChar;
+  out << std::uppercase << std::hex << "  F: " << std::setw(2) << (int)reg.F << endChar;
+  out << std::uppercase << std::hex << "  H: " << std::setw(2) << (int)reg.H << endChar;
+  out << std::uppercase << std::hex << "  L: " << std::setw(2) << (int)reg.L << endChar;
+  out << std::uppercase << std::hex << "  HL: " << std::setw(4) << (int)((reg.H << 8) | reg.L) << endChar;
+  out << std::uppercase << std::hex << "  SP: " << std::setw(4) << SP << endChar;
+  out << std::uppercase << std::hex << "  PC: " << std::setw(4) << PC << endChar;
 
   if (isHeader) out << "\n== STATES ==\n";
-  out << std::uppercase << std::hex << "\t IME: " << IME << endChar;
-  out << std::uppercase << std::hex << "\t LY: " << (int)ppu->LY << endChar;
-  out << std::uppercase << std::dec << "\t FRAME: " << ppu->currentFrame << endChar;
-  out << std::uppercase << std::hex << "\t HALTED: " << halted << endChar;
-  out << std::uppercase << std::hex << "\t RUNNING: " << running << endChar;
+  out << std::uppercase << std::hex << "  IME: " << IME << endChar;
+  out << std::uppercase << std::hex << "  LY: " << (int)ppu->LY << endChar;
+  out << std::uppercase << std::hex << "  LY[0xFF44]: " << (int)memory.memory[0xFF44] << endChar;
+  out << std::uppercase << std::hex << "  LCDC [0xFF40]: " << (int)memory.memory[0xFF40] << endChar;
+  out << std::uppercase << std::hex << "    " << std::bitset<8>(memory.memory[0xFF40]) << endChar;
+  out << std::uppercase << std::hex << "  STAT [0xFF41]: " << (int)memory.memory[0xFF41] << endChar;
+  out << std::uppercase << std::hex << "    " << std::bitset<8>(memory.memory[0xFF41]) << endChar;
+  out << std::uppercase << std::dec << "  FRAME: " << ppu->currentFrame << endChar;
+  out << std::uppercase << std::hex << "  HALTED: " << halted << endChar;
+  out << std::uppercase << std::hex << "  RUNNING: " << running << endChar;
 
   if (isHeader) out << "\n== FLAGS ==\n";
-  out << std::uppercase << std::hex << "\t Z: " << ((reg.F & 0x80) >> 7) << endChar;
-  out << std::uppercase << std::hex << "\t N: " << ((reg.F & 0x40) >> 6) << endChar;
-  out << std::uppercase << std::hex << "\t H: " << ((reg.F & 0x20) >> 5) << endChar;
-  out << std::uppercase << std::hex << "\t C: " << ((reg.F & 0x10) >> 4) << endChar;
+  out << std::uppercase << std::hex << "  Z: " << ((reg.F & 0x80) >> 7) << endChar;
+  out << std::uppercase << std::hex << "  N: " << ((reg.F & 0x40) >> 6) << endChar;
+  out << std::uppercase << std::hex << "  H: " << ((reg.F & 0x20) >> 5) << endChar;
+  out << std::uppercase << std::hex << "  C: " << ((reg.F & 0x10) >> 4) << endChar;
 
   // Revert Formatting Back
   out.copyfmt(init);
