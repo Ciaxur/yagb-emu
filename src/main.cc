@@ -11,8 +11,13 @@
 // Global Variables
 SDL_Window *window;
 struct KeyboardState {
-    bool step_instr = false;
-    int step_instr_hold = 0;    // Iterations Held
+  // Key Enabled/Disabled
+  bool step_instr = false;
+  bool step_frame = false;
+
+  // Key Held down for
+  int step_instr_hold = 0;
+  int step_frame_hold = 0;
 } keystate;
 
 inline void render(ImVec4 clear_color, ImGuiIO& io) {
@@ -56,15 +61,24 @@ void handleEventPolling(CPU *cpu) {
           keystate.step_instr = true;
         keystate.step_instr_hold++;
       }
+      if (windowEvent.key.keysym.sym == SDL_KeyCode::SDLK_f) {
+        if (keystate.step_frame_hold == 0)
+          keystate.step_frame = true;
+        keystate.step_frame_hold++;
+      }
 
 
       break;
     case SDL_KEYUP:
       // TODO: Key Press Here
-       if (windowEvent.key.keysym.sym == SDL_KeyCode::SDLK_s) {
-         keystate.step_instr = false;
-         keystate.step_instr_hold = 0;
-       }
+      if (windowEvent.key.keysym.sym == SDL_KeyCode::SDLK_s) {
+        keystate.step_instr = false;
+        keystate.step_instr_hold = 0;
+      }
+      if (windowEvent.key.keysym.sym == SDL_KeyCode::SDLK_f) {
+        keystate.step_frame = false;
+        keystate.step_frame_hold = 0;
+      }
 
       break;
 
@@ -167,7 +181,6 @@ int main(int argc, char *argv[]) {
 
   MemoryEditor mem_edit;
 
-
   while (cpu->isRunning()) {
     // Measure the Speed (FPS)
     uint32_t currentTime = SDL_GetTicks();
@@ -217,7 +230,7 @@ int main(int argc, char *argv[]) {
           cpu->tick();
       }
       ImGui::SameLine();
-      if (ImGui::Button("Step Frame")) {
+      if (ImGui::Button("Step Frame") || keystate.step_frame || (keystate.step_frame_hold > 10)) {
         int preFrame = cpu->getCurrentFrame();
         while (preFrame == cpu->getCurrentFrame()) {
           cpu->tick();

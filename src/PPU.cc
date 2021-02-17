@@ -42,6 +42,11 @@ void PPU::execute() {
   //  CPU's current States
   if (cpu->cyclesLeft <= 0) { // End of current scanline
     if (this->LY == 143) {
+      // VBlank Area
+      uint8_t IF = memory->read(0xFF0F);
+      IF |= 0x01;
+      memory->write(0xFF0F, IF);
+
       this->LY = 144;
       this->currentFrame++;
       cpu->cyclesLeft += 114;   // Account for Extra Cycles Taken

@@ -190,6 +190,7 @@ private:
     std::unordered_map<uint16_t, Opcode*> pMap; // Prefix Map
     Register reg;
     bool IME;
+    bool delayed_IME;     // Delays IME Set by one Instruction
     bool halted;
     bool running;
     uint16_t PC;

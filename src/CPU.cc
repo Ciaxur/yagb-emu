@@ -183,6 +183,12 @@ void CPU::dump(std::ostream &out, bool isHeader, char endChar) {
   out << std::uppercase << std::hex << "    " << std::bitset<8>(memory.memory[0xFF40]) << endChar;
   out << std::uppercase << std::hex << "  STAT [0xFF41]: " << (int)memory.memory[0xFF41] << endChar;
   out << std::uppercase << std::hex << "    " << std::bitset<8>(memory.memory[0xFF41]) << endChar;
+
+  out << std::uppercase << std::hex << "  IE [0xFFFF]: " << (int)memory.memory[0xFFFF] << endChar;
+  out << std::uppercase << std::hex << "    " << std::bitset<8>(memory.memory[0xFFFF]) << endChar;
+  out << std::uppercase << std::hex << "  IF [0xFF0F]: " << (int)memory.memory[0xFF0F] << endChar;
+  out << std::uppercase << std::hex << "    " << std::bitset<8>(memory.memory[0xFF0F]) << endChar;
+
   out << std::uppercase << std::dec << "  FRAME: " << ppu->currentFrame << endChar;
   out << std::uppercase << std::hex << "  HALTED: " << halted << endChar;
   out << std::uppercase << std::hex << "  RUNNING: " << running << endChar;
@@ -214,7 +220,7 @@ void CPU::execute() {
   handleInterrupt();
 
   // Verify PC Validity
-  if (PC < 0x100 || this->PC > 0xFFFF || this->PC < 0x0000) {
+  if (PC < 0x0040 || this->PC > 0xFFFF || this->PC < 0x0000) {
     std::cout << "Something went wrong...\n";
     std::cout << "Invalid PC = " << this->PC << '\n';
     this->running = false;
@@ -265,12 +271,64 @@ void CPU::execute() {
   this->extraCycles = 0;
 }
 
-
-// TODO:
+/**
+ * Handles (IME = 1) Requested Interrupt (IF) given the associated
+ *  interrupt is Enabled (IE).
+ */
 void CPU::handleInterrupt() {
   if (this->IME) {
     std::cout << "CPU INTERRUPTED!\n";
-    this->running = false;
+
+    // Memory Registers Required
+    uint8_t IE = this->memory.read(0xFFFF);
+    uint8_t IF = this->memory.read(0xFF0F);
+    uint8_t IH = (IE & IF) & 0x1F;
+
+    // Least Significant bit gets highest priority
+    if (IH & 0x01) {          // Bit0: V-Blank
+      // Basically CALL without the offset
+      this->PUSH(&PC);
+      PC = 0x0040;
+
+      // Consume CPU Cycles + 2 (internal timing NOPs)
+      cyclesLeft -= 5;
+
+      // Unset Handled Bit
+      IF &= ~0x01;
+
+      // Dispatch Handled
+      IME = false;
+    } else if (IH & 0x02) {   // Bit1: LCD STAT
+      this->PUSH(&PC);
+      PC = 0x0048;
+      cyclesLeft -= 5;
+      IF &= ~0x02;
+      IME = false;
+    } else if (IH & 0x04) {   // Bit2: Timer
+      this->PUSH(&PC);
+      PC = 0x0050;
+      cyclesLeft -= 5;
+      IF &= ~0x04;
+      IME = false;
+    } else if (IH & 0x08) {   // Bit3: Serial
+      this->PUSH(&PC);
+      PC = 0x0058;
+      cyclesLeft -= 5;
+      IF &= ~0x08;
+      IME = false;
+    } else if (IH & 0x10) {   // Bit4: Joypad
+      this->PUSH(&PC);
+      PC = 0x0060;
+      cyclesLeft -= 5;
+      IF &= ~0x10;
+      IME = false;
+    }
+  }
+
+  // Check IME Delayed Enable (EI)
+  else if (delayed_IME) {
+    delayed_IME = false;
+    IME = true;
   }
 }
 

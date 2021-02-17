@@ -793,7 +793,7 @@ void CPU::DI() {                                 // DI
 }
 
 void CPU::EI() {                                 // EI
-  this->IME = true;
+  this->delayed_IME = true;
 }
 
 void CPU::HALT() {                               // HALT
