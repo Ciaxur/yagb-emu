@@ -15,6 +15,10 @@ CPU::CPU(std::string ROMPath): memory(ROMPath) {
   halted = false;
   running = true;
 
+  // Timer Cycles Initial State
+  timerCycles.div = 0;
+  timerCycles.tima = 0;
+
   // CPU Initial State
   IME = false;
   PC = 0x0100;
@@ -180,14 +184,14 @@ void CPU::dump(std::ostream &out, bool isHeader, char endChar) {
   out << std::uppercase << std::hex << "  LY: " << (int)ppu->LY << endChar;
   out << std::uppercase << std::hex << "  LY[0xFF44]: " << (int)memory.memory[0xFF44] << endChar;
   out << std::uppercase << std::hex << "  LCDC [0xFF40]: " << (int)memory.memory[0xFF40] << endChar;
-  out << std::uppercase << std::hex << "    " << std::bitset<8>(memory.memory[0xFF40]) << endChar;
+  out << std::uppercase << std::hex << "    " << std::bitset<8>(memory.memory[0xFF40]) << endChar << endChar;
   out << std::uppercase << std::hex << "  STAT [0xFF41]: " << (int)memory.memory[0xFF41] << endChar;
-  out << std::uppercase << std::hex << "    " << std::bitset<8>(memory.memory[0xFF41]) << endChar;
+  out << std::uppercase << std::hex << "    " << std::bitset<8>(memory.memory[0xFF41]) << endChar << endChar;
 
   out << std::uppercase << std::hex << "  IE [0xFFFF]: " << (int)memory.memory[0xFFFF] << endChar;
-  out << std::uppercase << std::hex << "    " << std::bitset<8>(memory.memory[0xFFFF]) << endChar;
+  out << std::uppercase << std::hex << "    " << std::bitset<8>(memory.memory[0xFFFF]) << endChar << endChar;
   out << std::uppercase << std::hex << "  IF [0xFF0F]: " << (int)memory.memory[0xFF0F] << endChar;
-  out << std::uppercase << std::hex << "    " << std::bitset<8>(memory.memory[0xFF0F]) << endChar;
+  out << std::uppercase << std::hex << "    " << std::bitset<8>(memory.memory[0xFF0F]) << endChar << endChar;
 
   out << std::uppercase << std::dec << "  FRAME: " << ppu->currentFrame << endChar;
   out << std::uppercase << std::hex << "  HALTED: " << halted << endChar;
@@ -264,11 +268,16 @@ void CPU::execute() {
   this->PC += opcodeObj->length;
 
   // Keep track of CPU's State
+  uint8_t cyclesTaken = this->extraCycles + opcodeObj->machineCycles;
+
   // Decrement CyclesLeft & Additional Cycles taken by Opcode
   totalInstructions++;
-  totalCycles += this->extraCycles + opcodeObj->machineCycles;
-  cyclesLeft -= this->extraCycles + opcodeObj->machineCycles;
+  totalCycles += cyclesTaken;
+  cyclesLeft -= cyclesTaken;
   this->extraCycles = 0;
+
+  // Update Timers
+  updateTimers(cyclesTaken);
 }
 
 /**
@@ -292,6 +301,7 @@ void CPU::handleInterrupt() {
 
       // Consume CPU Cycles + 2 (internal timing NOPs)
       cyclesLeft -= 5;
+      updateTimers(5);
 
       // Unset Handled Bit
       IF &= ~0x01;
@@ -302,27 +312,34 @@ void CPU::handleInterrupt() {
       this->PUSH(&PC);
       PC = 0x0048;
       cyclesLeft -= 5;
+      updateTimers(5);
       IF &= ~0x02;
       IME = false;
     } else if (IH & 0x04) {   // Bit2: Timer
       this->PUSH(&PC);
       PC = 0x0050;
       cyclesLeft -= 5;
+      updateTimers(5);
       IF &= ~0x04;
       IME = false;
     } else if (IH & 0x08) {   // Bit3: Serial
       this->PUSH(&PC);
       PC = 0x0058;
       cyclesLeft -= 5;
+      updateTimers(5);
       IF &= ~0x08;
       IME = false;
     } else if (IH & 0x10) {   // Bit4: Joypad
       this->PUSH(&PC);
       PC = 0x0060;
       cyclesLeft -= 5;
+      updateTimers(5);
       IF &= ~0x10;
       IME = false;
     }
+
+    // Update IF
+    this->memory.write(0xFF0F, IF);
   }
 
   // Check IME Delayed Enable (EI)
@@ -352,4 +369,75 @@ const uint8_t* CPU::getMemory() {
  */
 const int CPU::getCurrentFrame() {
   return this->ppu->currentFrame;
+}
+
+/**
+ * Updates all Timers based on the total passed cycles.
+ * @param cyclesPassed Total Cycles executed by the CPU
+ */
+void CPU::updateTimers(uint8_t cyclesPassed) {
+  // Keep track of Cycles passed for each of the Timers
+  this->timerCycles.div += cyclesPassed;
+
+  // Get TAC Configuration
+  uint8_t TAC = this->memory.read(0xFF07);
+
+
+  if (this->timerCycles.div >= 64) {
+    uint8_t DIV = this->memory.read(0xFF04);
+    memory.memory[0xFF04] = ++DIV;
+    this->timerCycles.div -= 64;
+  }
+
+
+
+  // TAC-Enabled, Tick TIMA
+  // TODO: Figure out what happens if TAC changes interval while TAC enabled.
+  if (TAC & (1 << 2)) {
+    this->timerCycles.tima += cyclesPassed;
+    uint8_t TIMA_OLD = this->memory.read(0xFF05);
+    uint8_t TIMA = TIMA_OLD;
+
+    switch (TAC & 0x03) {
+      case 0x00:
+        if (timerCycles.tima >= 256) {
+          TIMA++;
+          timerCycles.tima -= 256;
+        }
+        break;
+      case 0x01:
+        if (timerCycles.tima >= 4) {
+          TIMA++;
+          timerCycles.tima -= 4;
+        }
+        break;
+      case 0x10:
+        if (timerCycles.tima >= 16) {
+          TIMA++;
+          timerCycles.tima -= 16;
+        }
+        break;
+      case 0x11:
+        if (timerCycles.tima >= 64) {
+          TIMA++;
+          timerCycles.tima -= 64;
+        }
+        break;
+    }
+
+    // CHECK IF OVERFLOW
+    if (TIMA < TIMA_OLD) {
+      // Request Timer Interrupt
+      uint8_t IF = this->memory.read(0xFF0F);
+      this->memory.write(0xFF0F, IF |= 0x04);
+
+      // Set TIMA = TAC
+      TIMA = this->memory.read(0xFF06);
+    }
+
+
+    this->memory.write(0xFF05, TIMA);
+  }
+
+
 }

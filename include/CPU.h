@@ -11,6 +11,14 @@
 #define TOTAL_LINE_CYCLES 114
 #define TOTAL_INSTR_PER_FRAME 17556
 
+// Keeps track of how many CPU Machine Cycles
+//  passed in order to tick their Memory Register
+//  location based on Machine Cycles
+struct TimerCycles {
+    uint div;
+    uint tima;
+};
+
 struct Register {
     uint8_t A;
     uint8_t B;
@@ -182,13 +190,14 @@ protected:
 
 public: // Public Variables
     std::deque<std::string> instructionStack;
-    unsigned long totalInstructions = 0;
-    unsigned long totalCycles = 0;
+    unsigned long long totalInstructions = 0;
+    unsigned long long totalCycles = 0;
 
 private:
     std::unordered_map<uint16_t, Opcode*> oMap; // Opcode Map
     std::unordered_map<uint16_t, Opcode*> pMap; // Prefix Map
     Register reg;
+    TimerCycles timerCycles;
     bool IME;
     bool delayed_IME;     // Delays IME Set by one Instruction
     bool halted;
@@ -199,6 +208,7 @@ private:
     std::ofstream cpuExecDump;
 
     void handleInterrupt();
+    void updateTimers(uint8_t);
 
     // Flag Methods
     void setZeroFlag(bool state);

@@ -264,6 +264,29 @@ int main(int argc, char *argv[]) {
       ImGui::End();
     }
 
+    // CPU Timers
+    {
+      ImGui::Begin("Timers");
+
+      ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "DIV: ");
+      ImGui::SameLine();
+      ImGui::Text("0x%X", (int)cpu->getMemory()[0xFF04]);
+
+      ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "TIMA: ");
+      ImGui::SameLine();
+      ImGui::Text("0x%X", (int)cpu->getMemory()[0xFF05]);
+
+      ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "TMA: ");
+      ImGui::SameLine();
+      ImGui::Text("0x%X", (int)cpu->getMemory()[0xFF06]);
+
+      ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "TAC: ");
+      ImGui::SameLine();
+      ImGui::Text("0x%X", (int)cpu->getMemory()[0xFF07]);
+
+      ImGui::End();
+    }
+
     // Render
     render({0.45f, 0.55f, 0.60f, 1.00f}, io);
 
