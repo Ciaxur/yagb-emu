@@ -1,4 +1,3 @@
-#include <bitset>
 #include "../include/CPU.h"
 #include "../include/OpcodeInit.hpp"
 #include "../include/PPU.h"
@@ -362,6 +361,21 @@ void CPU::stop() {
  */
 const uint8_t* CPU::getMemory() {
   return this->memory.memory;
+}
+
+/**
+ * @return A Snapshot of the current CPU's State
+ */
+const CPU_State CPU::getCpuStateSnapshot() {
+  return {
+    reg,
+    SP,
+    PC,
+    ppu->LY,
+    IME,
+    halted,
+    running
+  };
 }
 
 /**

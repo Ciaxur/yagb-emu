@@ -1,4 +1,5 @@
 #pragma once
+#include <bitset>
 #include <stdint.h>
 #include <string>
 #include <unordered_map>
@@ -28,6 +29,17 @@ struct Register {
     uint8_t F;  // Flags in Bit Order (Bit 7-4) Left to Right: ZERO NEG HALF-CARRY CARRY (ZNHC)
     uint8_t H;
     uint8_t L;
+};
+
+// Holds a Snapshot of the CPU State
+struct CPU_State {
+    Register reg;
+    uint16_t SP;
+    uint16_t PC;
+    uint8_t LY;
+    bool IME;
+    bool halted;
+    bool running;
 };
 
 enum ConditionCode { Z, NZ, C, NC };
@@ -234,4 +246,5 @@ public:
     const int getCurrentFrame();
     void stop();
     const uint8_t *getMemory();
+    const CPU_State getCpuStateSnapshot();
 };

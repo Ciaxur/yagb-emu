@@ -254,12 +254,169 @@ int main(int argc, char *argv[]) {
       ImGui::End();
     }
 
-    // CPU Flags
+    // CPU State
     {
+      CPU_State cpuState = cpu->getCpuStateSnapshot();
+      
       ImGui::Begin("CPU State");
-      std::ostringstream ss;
-      cpu->dump(ss);
-      ImGui::Text(ss.str().c_str());
+
+      // Registers
+      {
+        ImGui::Text("REGISTERS");
+        ImGui::Separator();
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "A:  ");
+        ImGui::SameLine();
+        ImGui::Text("0x%02X", (int)cpuState.reg.A);
+
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "B:  ");
+        ImGui::SameLine();
+        ImGui::Text("0x%02X", (int)cpuState.reg.B);
+
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "C:  ");
+        ImGui::SameLine();
+        ImGui::Text("0x%02X", (int)cpuState.reg.C);
+
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "D:  ");
+        ImGui::SameLine();
+        ImGui::Text("0x%02X", (int)cpuState.reg.D);
+
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "E:  ");
+        ImGui::SameLine();
+        ImGui::Text("0x%02X", (int)cpuState.reg.E);
+
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "F:  ");
+        ImGui::SameLine();
+        ImGui::Text("0x%02X", (int)cpuState.reg.F);
+
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "H:  ");
+        ImGui::SameLine();
+        ImGui::Text("0x%02X", (int)cpuState.reg.H);
+
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "L:  ");
+        ImGui::SameLine();
+        ImGui::Text("0x%02X", (int)cpuState.reg.L);
+
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "HL: ");
+        ImGui::SameLine();
+        ImGui::Text("0x%04X", (int)((cpuState.reg.H << 8) | cpuState.reg.L));
+
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "SP: ");
+        ImGui::SameLine();
+        ImGui::Text("0x%04X", (int)cpuState.SP);
+
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "PC: ");
+        ImGui::SameLine();
+        ImGui::Text("0x%04X", (int)cpuState.PC);
+      }
+
+      // Flags
+      {
+        ImGui::Separator();
+        ImGui::Text("FLAGS");
+
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "Z: ");
+        ImGui::SameLine();
+        ImGui::Text("%d", (cpuState.reg.F & 0x80) >> 7);
+        ImGui::SameLine();
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "  N: ");
+        ImGui::SameLine();
+        ImGui::Text("%d", (cpuState.reg.F & 0x40) >> 6);
+        
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "H: ");
+        ImGui::SameLine();
+        ImGui::Text("%d", (cpuState.reg.F & 0x20) >> 5);
+        ImGui::SameLine();
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "  C: ");
+        ImGui::SameLine();
+        ImGui::Text("%d", (cpuState.reg.F & 0x10) >> 4);
+      }
+
+      // Interrupts
+      {
+        uint8_t IE = cpu->getMemory()[0xFFFF];
+        uint8_t IF = cpu->getMemory()[0xFF0F];
+        
+        ImGui::Separator();
+        ImGui::Text("INTERRUPTS");
+
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "IME: ");
+        ImGui::SameLine();
+        ImGui::Text("%d", cpuState.IME);
+
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "IE [0xFFFF]:");
+        ImGui::SameLine();
+        ImGui::Text("0x%04X <%s>", 
+          (int)IE,
+          std::bitset<5>(IE).to_string().c_str()
+        );
+
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "IF [0xFF0F]:");
+        ImGui::SameLine();
+        ImGui::Text("0x%04X <%s>", 
+          (int)IF,
+          std::bitset<5>(IF).to_string().c_str()
+        );
+
+        ImGui::Indent();
+
+        ImGui::TextColored(ImVec4(0.102f, 0.737f, 0.612f, 1.0f), "VBLANK:");
+        ImGui::SameLine();
+        ImGui::Text(" IE[%d]  IF[%d]", (IE & 0x01), (IF & 0x01));
+        
+        ImGui::TextColored(ImVec4(0.102f, 0.737f, 0.612f, 1.0f), "STAT:  ");
+        ImGui::SameLine();
+        ImGui::Text(" IE[%d]  IF[%d]", (IE & 0x02) >> 1, (IF & 0x02) >> 1);
+
+        ImGui::TextColored(ImVec4(0.102f, 0.737f, 0.612f, 1.0f), "TIMER: ");
+        ImGui::SameLine();
+        ImGui::Text(" IE[%d]  IF[%d]", (IE & 0x04) >> 2, (IF & 0x04) >> 2);
+        
+        ImGui::TextColored(ImVec4(0.102f, 0.737f, 0.612f, 1.0f), "SERIAL:");
+        ImGui::SameLine();
+        ImGui::Text(" IE[%d]  IF[%d]", (IE & 0x08) >> 3, (IF & 0x08) >> 3);
+
+        ImGui::TextColored(ImVec4(0.102f, 0.737f, 0.612f, 1.0f), "JOYPAD:");
+        ImGui::SameLine();
+        ImGui::Text(" IE[%d]  IF[%d]", (IE & 0x10) >> 4, (IF & 0x10) >> 4);
+        
+        ImGui::Unindent();
+      }
+
+      // State
+      {
+        ImGui::Text("STATE");
+        ImGui::Separator();
+
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "Halted: ");
+        ImGui::SameLine();
+        ImGui::Text("%d", cpuState.halted);
+
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "Running: ");
+        ImGui::SameLine();
+        ImGui::Text("%d", cpuState.running);
+      }
+
+      // LCD
+      {
+        ImGui::Text("LCD");
+        ImGui::Separator();
+
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "LY: ");
+        ImGui::SameLine();
+        ImGui::Text("%d", cpuState.LY);
+
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "LY   [0xFF44]:");
+        ImGui::SameLine();
+        ImGui::Text("0x%04X", (int)cpu->getMemory()[0xFF44]);
+        
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "LCDC [0xFF40]:");
+        ImGui::SameLine();
+        ImGui::Text("0x%04X", (int)cpu->getMemory()[0xFF40]);
+
+        ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "STAT [0xFF41]:");
+        ImGui::SameLine();
+        ImGui::Text("0x%04X", (int)cpu->getMemory()[0xFF41]);
+      }
 
       ImGui::End();
     }
@@ -268,7 +425,7 @@ int main(int argc, char *argv[]) {
     {
       ImGui::Begin("Timers");
 
-      ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "DIV: ");
+      ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "DIV:  ");
       ImGui::SameLine();
       ImGui::Text("0x%X", (int)cpu->getMemory()[0xFF04]);
 
@@ -276,11 +433,11 @@ int main(int argc, char *argv[]) {
       ImGui::SameLine();
       ImGui::Text("0x%X", (int)cpu->getMemory()[0xFF05]);
 
-      ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "TMA: ");
+      ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "TMA:  ");
       ImGui::SameLine();
       ImGui::Text("0x%X", (int)cpu->getMemory()[0xFF06]);
 
-      ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "TAC: ");
+      ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "TAC:  ");
       ImGui::SameLine();
       ImGui::Text("0x%X", (int)cpu->getMemory()[0xFF07]);
 
