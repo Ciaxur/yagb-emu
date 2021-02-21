@@ -42,6 +42,13 @@ struct CPU_State {
     bool running;
 };
 
+// Holds key information about an Instruction
+//  being called
+struct Instr_Iterations {
+    uint frequency;     // How frequency the Instruciton was Called
+    Opcode *opcode;     // Pointer to Opcode Object
+};
+
 enum ConditionCode { Z, NZ, C, NC };
 
 class PPU;    // Forward-Declaration
@@ -204,6 +211,7 @@ public: // Public Variables
     std::deque<std::string> instructionStack;
     unsigned long long totalInstructions = 0;
     unsigned long long totalCycles = 0;
+    std::unordered_map<uint8_t, Instr_Iterations*> instr_iters;
 
 private:
     std::unordered_map<uint16_t, Opcode*> oMap; // Opcode Map

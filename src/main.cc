@@ -61,7 +61,7 @@ void handleEventPolling(CPU *cpu) {
           keystate.step_instr = true;
         keystate.step_instr_hold++;
       }
-      if (windowEvent.key.keysym.sym == SDL_KeyCode::SDLK_f) {
+      if (windowEvent.key.keysym.sym == SDL_KeyCode::SDLK_m) {
         if (keystate.step_frame_hold == 0)
           keystate.step_frame = true;
         keystate.step_frame_hold++;
@@ -75,7 +75,7 @@ void handleEventPolling(CPU *cpu) {
         keystate.step_instr = false;
         keystate.step_instr_hold = 0;
       }
-      if (windowEvent.key.keysym.sym == SDL_KeyCode::SDLK_f) {
+      if (windowEvent.key.keysym.sym == SDL_KeyCode::SDLK_m) {
         keystate.step_frame = false;
         keystate.step_frame_hold = 0;
       }
@@ -263,7 +263,6 @@ int main(int argc, char *argv[]) {
       // Registers
       {
         ImGui::Text("REGISTERS");
-        ImGui::Separator();
         ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "A:  ");
         ImGui::SameLine();
         ImGui::Text("0x%02X", (int)cpuState.reg.A);
@@ -384,8 +383,8 @@ int main(int argc, char *argv[]) {
 
       // State
       {
-        ImGui::Text("STATE");
         ImGui::Separator();
+        ImGui::Text("STATE");
 
         ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "Halted: ");
         ImGui::SameLine();
@@ -398,8 +397,8 @@ int main(int argc, char *argv[]) {
 
       // LCD
       {
-        ImGui::Text("LCD");
         ImGui::Separator();
+        ImGui::Text("LCD");
 
         ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "LY: ");
         ImGui::SameLine();
@@ -427,22 +426,46 @@ int main(int argc, char *argv[]) {
 
       ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "DIV:  ");
       ImGui::SameLine();
-      ImGui::Text("0x%X", (int)cpu->getMemory()[0xFF04]);
+      ImGui::Text("0x%04X", (int)cpu->getMemory()[0xFF04]);
 
       ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "TIMA: ");
       ImGui::SameLine();
-      ImGui::Text("0x%X", (int)cpu->getMemory()[0xFF05]);
+      ImGui::Text("0x%04X", (int)cpu->getMemory()[0xFF05]);
 
       ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "TMA:  ");
       ImGui::SameLine();
-      ImGui::Text("0x%X", (int)cpu->getMemory()[0xFF06]);
+      ImGui::Text("0x%04X", (int)cpu->getMemory()[0xFF06]);
 
       ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "TAC:  ");
       ImGui::SameLine();
-      ImGui::Text("0x%X", (int)cpu->getMemory()[0xFF07]);
+      ImGui::Text("0x%04X", (int)cpu->getMemory()[0xFF07]);
 
       ImGui::End();
     }
+
+    // CPU Instruction Iterations (Frequency of each instruction called)
+    {
+      ImGui::Begin("Instruction Frequency");
+
+      if (ImGui::Button("Reset")) {
+        cpu->instr_iters.clear();
+      }
+
+      ImGui::TextColored(ImVec4(231/255.0f, 60/255.0f, 153/255.0f, 1.0f), "FREQUENCY");
+      
+      for (const std::pair<uint8_t, Instr_Iterations*> &p : cpu->instr_iters) {
+        ImGui::TextColored(
+          ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "0x%04X [%s]: ", 
+          p.first, 
+          p.second->opcode->getLabel().c_str()
+        );
+        ImGui::SameLine();
+        ImGui::Text("%d", p.second->frequency);
+      }
+      
+      ImGui::End();
+    }
+
 
     // Render
     render({0.45f, 0.55f, 0.60f, 1.00f}, io);

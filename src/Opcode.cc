@@ -17,3 +17,10 @@ Opcode::Opcode(uint8_t opcode, std::string label, uint16_t machineCycles, uint16
     this->length = length;
     this->exec = exec;
 }
+
+/**
+ * @return Opcode's Label
+ */
+const std::string Opcode::getLabel() {
+    return this->label;
+}

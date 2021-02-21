@@ -82,6 +82,11 @@ CPU::~CPU() {
   }
   delete this->ppu;
   cpuExecDump.close();
+
+  // Clean up Debug Data
+  for (auto &p : this->instr_iters) {
+    delete p.second;
+  }
 };
 
 /**
@@ -249,7 +254,7 @@ void CPU::execute() {
     opcodeObj = pMap[this->memory.read(this->PC + 1)];
   }
 
-  // Keep track of Previous 10 Instructions
+  // DEBUG: Keep track of Previous 10 Instructions
   std::ostringstream ss;
   ss << std::hex << std::uppercase;
   ss << PC << ": " << opcodeObj->label << " | ";
@@ -259,6 +264,12 @@ void CPU::execute() {
   instructionStack.push_back(ss.str());
   if (instructionStack.size() >= 20)
     instructionStack.pop_front();
+  
+  // DEBUG: Track instruction execution frequency
+  if (instr_iters[currentOpcode])
+    instr_iters[currentOpcode]->frequency++;
+  else
+    instr_iters[currentOpcode] = new Instr_Iterations({ 1, opcodeObj });
 
   // Exec Opcode
   opcodeObj->exec();
