@@ -156,9 +156,22 @@ void CPU::checkCarry(uint8_t prev, uint16_t after, bool isSubOp) { // Overflow f
   if (isSubOp && prev > after)
     this->reg.F |= 0x10;
 
-  else if (isSubOp && (prev & 0xFF) != (after & 0xFF))  // LSB Change
+  else if (!isSubOp && (prev & 0xFF) != (after & 0xFF))  // LSB Change
     if ((prev & 0xFF00) != (after & 0xFF00))            // MSB Change
       this->reg.F |= 0x10;                              // Set C Flag
+}
+
+/**
+ * Checks and sets Carry for a u16 Operation
+ *  - Resets Carry first
+ * @param prev Previous u16 Value
+ * @param after The result of the Operation
+ */
+void CPU::checkCarry_16(uint16_t prev, uint32_t after) {
+  this->reg.F &= 0xEF;                         // Unset C Flag
+
+  if (after > std::numeric_limits<uint16_t>::max())
+    this->reg.F |= 0x10;
 }
 
 /**
@@ -228,7 +241,7 @@ void CPU::execute() {
   handleInterrupt();
 
   // Verify PC Validity
-  if (PC < 0x0040 || this->PC > 0xFFFF || this->PC < 0x0000) {
+  if (this->PC > 0xFFFF || this->PC < 0x0000) {
     std::cout << "Something went wrong...\n";
     std::cout << "Invalid PC = " << this->PC << '\n';
     this->running = false;

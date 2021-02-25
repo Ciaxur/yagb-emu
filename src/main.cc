@@ -226,13 +226,13 @@ int main(int argc, char *argv[]) {
       ImGui::SameLine();
       if (ImGui::Button("Step Instruction") || keystate.step_instr || (keystate.step_instr_hold > 10)) {
         keystate.step_instr = false;
-        for (int i=0; i<stepInstrCount; i++)
+        for (int i=0; i<stepInstrCount && cpu->isRunning(); i++)
           cpu->tick();
       }
       ImGui::SameLine();
       if (ImGui::Button("Step Frame") || keystate.step_frame || (keystate.step_frame_hold > 10)) {
         int preFrame = cpu->getCurrentFrame();
-        while (preFrame == cpu->getCurrentFrame()) {
+        while (preFrame == cpu->getCurrentFrame() && cpu->isRunning()) {
           cpu->tick();
         }
       }

@@ -5,7 +5,7 @@ BUILD = build
 CC = g++
 INCLUDE_PATHS = ./include ./include/imgui ./include/imgui/backends ./include/imgui_club
 INCLUDES = $(addprefix -I, $(INCLUDE_PATHS))
-FLAGS =
+FLAGS = -Wall
 OUT = $(BUILD)/yagb-emu
 CACHE = $(BUILD)/cache
 

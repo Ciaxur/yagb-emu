@@ -11,13 +11,13 @@ void CPU::ADC(uint16_t a16) {               // ADC A, [HL]
 }
 
 void CPU::ADC(uint8_t u8) {                 // ADC A, u8
-  uint8_t result = this->reg.A + (this->reg.F & 0x10) + u8;
+  uint8_t result = this->reg.A + ((this->reg.F & 0x10) >> 4) + u8;
 
   // Set Flags
   this->setZeroFlag(result == 0);     // Zero Flag
   this->setAddSubFlag(false);   // Unset N Flag
   this->checkHalfCarry(result, this->reg.A);
-  this->checkCarry(result, this->reg.A);
+  this->checkCarry(this->reg.A, result);
 
   // Set new A Value
   this->reg.A = result;
@@ -38,7 +38,7 @@ void CPU::ADD(uint8_t u8) {                 // ADD A, u8
   this->setZeroFlag(result == 0);     // Zero Flag
   this->setAddSubFlag(false);   // Unset N Flag
   this->checkHalfCarry(result, this->reg.A);
-  this->checkCarry(result, this->reg.A);
+  this->checkCarry(this->reg.A, result);
 
   // New A Value
   this->reg.A = result;
@@ -156,13 +156,13 @@ void CPU::SBC(uint16_t a16) {               // SBC A, [HL]
 }
 
 void CPU::SBC(uint8_t u8) {                 // SBC A, u8
-  uint8_t result = this->reg.A - u8 - (this->reg.F & 0x10);
+  uint8_t result = this->reg.A - u8 - ((this->reg.F & 0x10) >> 4);
 
   // Set Flags
   this->setZeroFlag(result == 0);     // Zero Flag
   this->setAddSubFlag(true);  // Set N Flag
   this->checkHalfCarry(this->reg.A, result);
-  this->checkCarry(u8 + (this->reg.F & 0x10), this->reg.A, true);  // Check Carry for Subtraction
+  this->checkCarry(u8 + ((this->reg.F & 0x10) >> 4), this->reg.A, true);  // Check Carry for Subtraction
 
   this->reg.A = result;
 }
@@ -214,7 +214,7 @@ void CPU::ADDHL(uint16_t r16) {             // ADD HL, r16
   // Set Flags
   this->setAddSubFlag(false);  // Unset N Flag
   this->checkHalfCarry(HL >> 8, result >> 8);
-  this->checkCarry(HL >> 8, result >> 8);
+  this->checkCarry_16(HL, HL + r16);
 
   this->reg.H = result >> 8;
   this->reg.L = result & 0xFF;
@@ -680,7 +680,7 @@ void CPU::ADDSP(int8_t e8) {                     // ADD SP, e8
   this->setZeroFlag(false);
   this->setAddSubFlag(false);
   this->checkHalfCarry(this->SP >> 8, result >> 8);
-  this->checkCarry(this->SP >> 8, result >> 8);
+  this->checkCarry_16(SP, SP + e8);
 
   this->SP = result;
 }
@@ -709,7 +709,7 @@ void CPU::LDHL(int8_t e8) {                      // LD HL, SP+e8
   this->setZeroFlag(false);
   this->setAddSubFlag(false);
   this->checkHalfCarry(this->SP >> 8, result >> 8);
-  this->checkCarry(this->SP >> 8, result >> 8);
+  this->checkCarry_16(SP, SP + e8);
 
   // Store into HL
   this->reg.H = this->SP << 8;
