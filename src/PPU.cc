@@ -14,6 +14,13 @@ PPU::PPU(CPU *cpu, Memory *memory) {
 }
 
 /**
+ * @return Current PPU's internal LY
+ */
+uint8_t PPU::getLY() const {
+  return this->LY;
+}
+
+/**
  * Executes the PPU based on current state of CPU
  *  and PPU
  */

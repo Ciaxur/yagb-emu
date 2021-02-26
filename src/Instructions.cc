@@ -80,7 +80,7 @@ void CPU::CP(uint8_t u8) {                  // CP A, u8
   this->setZeroFlag(result == 0);     // Zero Flag
   this->setAddSubFlag(true);  // Set N Flag
   this->checkHalfCarry(this->reg.A, result); // Set if borrow from bit 4
-  this->checkCarry(u8, this->reg.A, true); // Set if borrow
+  this->checkCarry(u8, this->reg.A); // Set if borrow
 }
 
 void CPU::DEC(uint8_t *r8) {                // DEC r8
@@ -162,7 +162,7 @@ void CPU::SBC(uint8_t u8) {                 // SBC A, u8
   this->setZeroFlag(result == 0);     // Zero Flag
   this->setAddSubFlag(true);  // Set N Flag
   this->checkHalfCarry(this->reg.A, result);
-  this->checkCarry(u8 + ((this->reg.F & 0x10) >> 4), this->reg.A, true);  // Check Carry for Subtraction
+  this->checkCarry(u8 + ((this->reg.F & 0x10) >> 4), this->reg.A);  // Check Carry for Subtraction
 
   this->reg.A = result;
 }
@@ -182,7 +182,7 @@ void CPU::SUB(uint8_t u8) {                 // SUB A, u8
   this->setZeroFlag(result == 0);      // Zero Flag
   this->setAddSubFlag(true);  // Set N Flag
   this->checkHalfCarry(this->reg.A, result);
-  this->checkCarry(u8, this->reg.A, true);  // Check Carry for Subtraction
+  this->checkCarry(u8, this->reg.A);  // Check Carry for Subtraction
 
   this->reg.A = result;
 }
@@ -732,7 +732,7 @@ void CPU::POP(uint8_t *ru, uint8_t *rl) {        // POP r16
 
 void CPU::PUSHAF() {                             // PUSH AF
   this->memory.write(--SP, this->reg.A);
-  this->memory.write(--SP, this->reg.F);
+  this->memory.write(--SP, this->reg.F & 0xF0); // ANNOYING AF
 }
 
 void CPU::PUSH(uint16_t *r16) {                  // PUSH r16

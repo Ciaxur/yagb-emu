@@ -150,15 +150,12 @@ void CPU::checkHalfCarry(uint8_t prev, uint8_t after) { // Overflow from 3rd Bit
  * @param after Result of the previous value
  * @return Result of the Set (if needed)
  */
-void CPU::checkCarry(uint8_t prev, uint16_t after, bool isSubOp) { // Overflow from 7th Bit
+void CPU::checkCarry(uint8_t prev, uint8_t after) { // Overflow from 7th Bit
   this->reg.F &= 0xEF;                         // Unset C Flag
 
-  if (isSubOp && prev > after)
-    this->reg.F |= 0x10;
-
-  else if (!isSubOp && (prev & 0xFF) != (after & 0xFF))  // LSB Change
-    if ((prev & 0xFF00) != (after & 0xFF00))            // MSB Change
-      this->reg.F |= 0x10;                              // Set C Flag
+  // Overflow Result
+  if (prev > after)
+    this->reg.F |= 0x10;                       // Set C Flag
 }
 
 /**
@@ -167,10 +164,10 @@ void CPU::checkCarry(uint8_t prev, uint16_t after, bool isSubOp) { // Overflow f
  * @param prev Previous u16 Value
  * @param after The result of the Operation
  */
-void CPU::checkCarry_16(uint16_t prev, uint32_t after) {
+void CPU::checkCarry_16(uint16_t prev, uint16_t after) {
   this->reg.F &= 0xEF;                         // Unset C Flag
 
-  if (after > std::numeric_limits<uint16_t>::max())
+  if (prev > after)
     this->reg.F |= 0x10;
 }
 
@@ -395,7 +392,7 @@ const CPU_State CPU::getCpuStateSnapshot() {
     reg,
     SP,
     PC,
-    ppu->LY,
+    ppu->getLY(),
     IME,
     halted,
     running

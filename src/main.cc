@@ -6,6 +6,7 @@
 #include <SDL2/SDL.h>
 #include <GL/glew.h>            // Initialize with glewInit()
 #include <iostream>
+#include <sstream>
 #include "../include/CPU.h"
 
 // Global Variables
@@ -200,6 +201,9 @@ int main(int argc, char *argv[]) {
 
     SDL_SetTextureColorMod(texture, 255, 0, 0);
 
+    // IM GUI Static Variables Used
+    static char breakpoint_addr[255];
+
     // Init Frame & Draw Texture
     ImGui_NewFrame();
     {
@@ -225,9 +229,10 @@ int main(int argc, char *argv[]) {
       }
       ImGui::SameLine();
       if (ImGui::Button("Step Instruction") || keystate.step_instr || (keystate.step_instr_hold > 10)) {
-        keystate.step_instr = false;
+        /*keystate.step_instr = false;
         for (int i=0; i<stepInstrCount && cpu->isRunning(); i++)
-          cpu->tick();
+          cpu->tick();*/
+        cpu->tick();
       }
       ImGui::SameLine();
       if (ImGui::Button("Step Frame") || keystate.step_frame || (keystate.step_frame_hold > 10)) {
@@ -237,7 +242,28 @@ int main(int argc, char *argv[]) {
         }
       }
       ImGui::EndGroup();
-      ImGui::InputInt("Instruction Count", &stepInstrCount);
+
+      ImGui::InputInt("##1", &stepInstrCount);
+      ImGui::SameLine();
+      if (ImGui::Button("Go To")) {
+        while(cpu->isRunning() && cpu->totalInstructions < stepInstrCount)
+          cpu->tick();
+      }
+
+      ImGui::InputText("##2", breakpoint_addr, 255);
+      ImGui::SameLine();
+      if (ImGui::Button("Breakpoint")) {
+        uint16_t breakpoint;
+        const int endFrame = cpu->getCurrentFrame() + 1000;
+        std::stringstream ss;
+        ss << std::hex << breakpoint_addr;
+        ss >> breakpoint;
+
+        do {
+          cpu->tick();
+        } while(cpu->isRunning() && cpu->getCpuStateSnapshot().PC != breakpoint && cpu->getCurrentFrame() < endFrame);
+      }
+
       ImGui::Text("Calculated Frame Count: %d", cpu->totalCycles / TOTAL_INSTR_PER_FRAME);
       ImGui::Text("Frame Count: %d", cpu->getCurrentFrame());
       ImGui::Text("Instruction Count: %d", cpu->totalInstructions);
@@ -256,9 +282,8 @@ int main(int argc, char *argv[]) {
 
     // CPU State
     {
-      CPU_State cpuState = cpu->getCpuStateSnapshot();
-      
       ImGui::Begin("CPU State");
+      CPU_State cpuState = cpu->getCpuStateSnapshot();
 
       // Registers
       {
@@ -402,7 +427,7 @@ int main(int argc, char *argv[]) {
 
         ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "LY: ");
         ImGui::SameLine();
-        ImGui::Text("%d", cpuState.LY);
+        ImGui::Text("%d <0x%02X>", cpuState.LY, cpuState.LY);
 
         ImGui::TextColored(ImVec4(0.9f, 0.29f, 0.235f, 1.0f), "LY   [0xFF44]:");
         ImGui::SameLine();
