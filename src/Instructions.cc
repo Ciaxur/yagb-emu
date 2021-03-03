@@ -764,28 +764,33 @@ void CPU::CPL() {                                // CPL
 
 void CPU::DAA() {                                // DAA
   uint8_t A = this->reg.A;
-  uint8_t correction = (this->reg.F & 0x01) ? 0x60 : 0x00;
-  bool N_Flag = (this->reg.F & 0x40) != 0;
 
-  // Half Carry or Addition & Bottom Nibble is bigger than 9 (BCD 0-9)
-  if ( ((this->reg.F & 0x20) != 0) || !N_Flag && ((A & 0x0F) > 0x09) ) {
-    correction |= 0x06;   // Adjust Bottom NIBBLE
+  // Addition
+  if (!(this->reg.F & 0x40)) {
+    if (this->reg.F & 0x20 || (this->reg.A & 0x0F) > 0x09) {
+      A += 0x06;
+    }
+    if (this->reg.F & 0x10 || this->reg.A > 0x9F) {
+      A += 0x60;
+      this->setCarryFlag(true);
+    }
+  } 
+  
+  // Subtraction
+  else {
+    if (this->reg.F & 0x20) {
+      A -= 0x06;
+    }
+    if (this->reg.F & 0x10) {
+      A -= 0x60;
+    }
   }
 
-  // Carry or Addition & Top Nibble is bigger than 9
-  if ( ((this->reg.F & 0x10) != 0) || (N_Flag && (A > 0x99)) ) {
-    correction |= 0x60;   // Adjust Top NIBBLE
-  }
-
-  // Set Flags
-  this->setZeroFlag(A);
+  this->setZeroFlag(A == 0);
   this->setHalfCarryFlag(false);
-  if (correction & 0x60) {
-    this->setCarryFlag(true);
-  }
 
   // Set the Value
-  this->reg.A = N_Flag ? (A - correction) : (A + correction);
+  this->reg.A = A;
 }
 
 void CPU::DI() {                                 // DI
