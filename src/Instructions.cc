@@ -764,17 +764,19 @@ void CPU::CPL() {                                // CPL
 
 void CPU::DAA() {                                // DAA
   uint8_t A = this->reg.A;
+  bool isAddedSix = false;
 
   // Addition
   if (!(this->reg.F & 0x40)) {
-    if (this->reg.F & 0x20 || (this->reg.A & 0x0F) > 0x09) {
+    if (this->reg.F & 0x20 || (A & 0x0F) > 0x09) {
       A += 0x06;
+      isAddedSix = true;
     }
-    if (this->reg.F & 0x10 || this->reg.A > 0x9F) {
+    if (this->reg.F & 0x10 || A > 0x9F || isAddedSix && A < 0x06) { // PATCHED END: If overflow from prev A
       A += 0x60;
       this->setCarryFlag(true);
     }
-  } 
+  }
   
   // Subtraction
   else {
